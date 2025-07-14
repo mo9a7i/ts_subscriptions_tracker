@@ -1,102 +1,33 @@
-# TypeScript Subscriptions Tracker
-
-A modern subscription management application built with Next.js 15, TypeScript, and Tailwind CSS. Track your recurring subscriptions, manage payments, and export your data with ease.
-
-## Features
-
-- **Subscription Management**: Add, edit, and delete subscription services
-- **Multi-Currency Support**: Track subscriptions in USD, EUR, GBP, CAD, and SAR with automatic conversion
-- **Smart Sorting**: Sort by next payment date, service name, or amount
-- **Label System**: Organize subscriptions with custom labels and filtering
-- **Auto-Renewal Tracking**: Toggle automatic renewal for each subscription
-- **Data Export**: Export your subscription data as JSON or Excel (XLSX) files
-- **Responsive Design**: Works seamlessly on desktop and mobile devices
-- **Dark Mode Support**: Toggle between light and dark themes
-- **Offline Storage**: Uses IndexedDB for local data persistence
-
-## Import & Export Functionality
-
-The application provides comprehensive data import and export options:
-
-### JSON Import
-- Import subscription data from JSON files
-- **Duplicate Detection**: Automatically detects and skips existing subscriptions based on ID matching
-- **Validation**: Validates imported data structure and required fields
-- **Detailed Results**: Shows import statistics (imported, skipped, errors)
-- **Error Handling**: Reports specific validation errors and failed imports
-- **Safe Operation**: Only adds new subscriptions, never overwrites existing data
-
-### JSON Export
-- Complete subscription data in JSON format
-- Includes all fields: service details, payment info, labels, comments, and timestamps
-- Filtered exports available when using label filters
-- Automatic filename generation with date stamps
-
-### Excel Export
-- Structured spreadsheet with readable column headers
-- Currency conversion to SAR for easy comparison
-- Optimized column widths for better readability
-- Includes creation and update timestamps
-- Filtered exports maintain label context in filenames
+This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started
 
-First, install dependencies:
+First, run the development server:
 
 ```bash
-pnpm install
-```
-
-Then, run the development server:
-
-```bash
+npm run dev
+# or
+yarn dev
+# or
 pnpm dev
+# or
+bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the application.
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-## Technology Stack
+You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
-- **Framework**: Next.js 15 with App Router
-- **Language**: TypeScript
-- **Styling**: Tailwind CSS v4
-- **UI Components**: Shadcn/UI with Radix primitives
-- **Database**: IndexedDB (client-side storage)
-- **Export**: XLSX library for Excel export functionality
-- **Icons**: Lucide React
+This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
-## Project Structure
+## Learn More
 
-```
-src/
-├── app/                 # Next.js app router pages
-├── components/          # React components
-│   ├── ui/             # Shadcn/UI components
-│   └── ...             # Application components
-├── lib/                # Utility functions
-│   ├── db.ts           # IndexedDB wrapper
-│   ├── currency.ts     # Currency conversion utilities
-│   ├── export-utils.ts # Data export functionality
-│   └── ...
-└── types/              # TypeScript type definitions
-```
+To learn more about Next.js, take a look at the following resources:
 
-## Usage
+- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
+- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
 
-1. **Add Subscriptions**: Click "Add Subscription" to create new subscription entries
-2. **Import Data**: Use the Export dropdown to import subscriptions from JSON files
-3. **Manage Data**: Edit or delete existing subscriptions from the list
-4. **Filter & Sort**: Use labels to filter and sort options to organize your view
-5. **Export Data**: Use the Export dropdown to download your data as JSON or Excel files
-6. **Track Payments**: Monitor upcoming payments and auto-renewal status
-
-## Development
-
-This project uses:
-- **Package Manager**: pnpm
-- **Code Style**: TypeScript strict mode
-- **UI Framework**: Tailwind CSS with CSS variables
-- **Component Library**: Shadcn/UI
+You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
 
 ## Deploy on Vercel
 

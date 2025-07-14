@@ -15,6 +15,7 @@ import { Plus, Upload, X } from "lucide-react"
 import { db } from "@/lib/db"
 import { getKnownService } from "@/lib/known-services"
 import { fetchFaviconAsDataUrl } from "@/lib/favicon"
+import { extractColorsFromImage } from "@/lib/color-utils"
 import type { Subscription, SubscriptionModalProps, SubscriptionFormData, SubscriptionFrequency } from "@/types"
 
 export function SubscriptionModal({ subscription, onSave, trigger }: SubscriptionModalProps) {
@@ -31,12 +32,28 @@ export function SubscriptionModal({ subscription, onSave, trigger }: Subscriptio
     comment: "",
     labels: [],
     autoRenewal: true,
+    colors: undefined,
   })
   const [newLabel, setNewLabel] = useState("")
   const [availableLabels, setAvailableLabels] = useState<string[]>([])
   const [isLoadingFavicon, setIsLoadingFavicon] = useState(false)
   const [validationErrors, setValidationErrors] = useState<{ [key: string]: string }>({})
   const [isFormValid, setIsFormValid] = useState(true)
+
+  // Extract colors for existing subscriptions that don't have colors
+  const extractColorsForExisting = async (subscription: Subscription) => {
+    if (!subscription.colors && subscription.icon) {
+      try {
+        const colors = await extractColorsFromImage(subscription.icon, subscription.name)
+        if (Object.keys(colors).length > 0) {
+          await db.updateSubscription(subscription.id, { colors })
+          setFormData((prev) => ({ ...prev, colors }))
+        }
+      } catch (error) {
+        console.error('Failed to extract colors for existing subscription:', error)
+      }
+    }
+  }
 
   useEffect(() => {
     if (subscription) {
@@ -52,10 +69,30 @@ export function SubscriptionModal({ subscription, onSave, trigger }: Subscriptio
         comment: subscription.comment || "",
         labels: subscription.labels,
         autoRenewal: subscription.autoRenewal ?? true,
+        colors: subscription.colors,
+      })
+      
+      // Extract colors for existing subscription if needed
+      extractColorsForExisting(subscription)
+    } else {
+      setFormData({
+        name: "",
+        amount: "",
+        currency: "SAR",
+        frequency: "monthly",
+        nextPayment: "",
+        startDate: "",
+        url: "",
+        icon: "",
+        comment: "",
+        labels: [],
+        autoRenewal: true,
+        colors: undefined,
       })
     }
+    setValidationErrors({})
     loadLabels()
-  }, [subscription])
+  }, [subscription, open])
 
   const loadLabels = async () => {
     const labels = await db.getAllLabels()
@@ -72,12 +109,21 @@ export function SubscriptionModal({ subscription, onSave, trigger }: Subscriptio
     }
   }
 
-  const handleIconUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleIconUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
     if (file) {
       const reader = new FileReader()
-      reader.onload = (e) => {
-        setFormData((prev) => ({ ...prev, icon: e.target?.result as string }))
+      reader.onload = async (e: ProgressEvent<FileReader>) => {
+        const imageDataUrl = e.target?.result as string
+        setFormData((prev) => ({ ...prev, icon: imageDataUrl }))
+        
+        // Extract colors from the uploaded image
+        try {
+          const colors = await extractColorsFromImage(imageDataUrl, formData.name)
+          setFormData((prev) => ({ ...prev, colors }))
+        } catch (error) {
+          console.error('Failed to extract colors from image:', error)
+        }
       }
       reader.readAsDataURL(file)
     }
@@ -147,6 +193,7 @@ export function SubscriptionModal({ subscription, onSave, trigger }: Subscriptio
       comment: "",
       labels: [],
       autoRenewal: true,
+      colors: undefined,
     })
     setValidationErrors({})
     setIsFormValid(true)
@@ -173,6 +220,7 @@ export function SubscriptionModal({ subscription, onSave, trigger }: Subscriptio
       comment: formData.comment || undefined,
       labels: formData.labels,
       autoRenewal: formData.autoRenewal,
+      colors: formData.colors,
     }
 
     try {

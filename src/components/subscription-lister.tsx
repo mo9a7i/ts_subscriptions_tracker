@@ -9,6 +9,7 @@ import { db } from "@/lib/db"
 import { SubscriptionModal } from "@/components/subscription-modal"
 import { formatCurrency, formatInSAR, getCurrencySymbol } from "@/lib/currency"
 import { formatNextPayment, getNextPaymentDate, isPaymentOverdue } from "@/lib/date-utils"
+import { getBestColorForBackground } from "@/lib/color-utils"
 import type { Subscription, SubscriptionListProps } from "@/types"
 
 export function SubscriptionList({ subscriptions, onUpdate, selectedLabels, sortBy, sortOrder }: SubscriptionListProps) {
@@ -99,105 +100,118 @@ export function SubscriptionList({ subscriptions, onUpdate, selectedLabels, sort
 
   return (
     <div className="space-y-1 lg:space-y-2">
-      {sortedSubscriptions.map((subscription) => (
-        <Card key={subscription.id} className="relative py-4">
-          <CardContent className="px-4 py-0">
-            <div className="gap-2 flex flex-col lg:flex-row items-start justify-between">
-              <div className="flex items-start gap-2 lg:gap-4 flex-1">
-                {subscription.icon && (
-                  <div className="lg:w-10 lg:h-10 w-6 h-6 rounded-lg flex items-center justify-center  flex-shrink-0">
-                    {subscription.icon.startsWith("data:") || subscription.icon.startsWith("http") ? (
-                      <img
-                        src={subscription.icon || "/placeholder.svg"}
-                        alt={subscription.name}
-                        className="lg:w-10 lg:h-10 w-6 h-6 rounded"
-                      />
-                    ) : (
-                      <span className="text-lg">{subscription.icon}</span>
-                    )}
-                  </div>
-                )}
-
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-3 mb-1">
-                    <h3 className="font-semibold truncate">{subscription.name}</h3>
-                    <div className="flex items-center gap-2">
-                      
-                      <Badge className={getFrequencyColor(subscription.frequency)}>{subscription.frequency}</Badge>
+      {sortedSubscriptions.map((subscription) => {
+        const backgroundColorOverlay = subscription.colors ? getBestColorForBackground(subscription.colors) : null
+        
+        return (
+          <Card key={subscription.id} className="relative rounded-md border-0 py-4 overflow-hidden">
+            {backgroundColorOverlay && (
+              <div 
+                className="absolute inset-0 opacity-40"
+                style={{ backgroundColor: backgroundColorOverlay }}
+              />
+            )}
+            <div 
+              className="absolute inset-0 bg-gradient-to-b from-white/20 to-black/10 dark:from-white/10 dark:to-black/10"
+            />
+            <CardContent className="px-4 py-0 relative z-10">
+              <div className="gap-2 flex flex-col lg:flex-row items-start justify-between">
+                <div className="flex items-start gap-2 lg:gap-4 flex-1">
+                  {subscription.icon && (
+                    <div className="lg:w-10 lg:h-10 w-6 h-6 rounded-lg flex items-center justify-center  flex-shrink-0">
+                      {subscription.icon.startsWith("data:") || subscription.icon.startsWith("http") ? (
+                        <img
+                          src={subscription.icon || "/placeholder.svg"}
+                          alt={subscription.name}
+                          className="lg:w-10 lg:h-10 w-6 h-6 rounded"
+                        />
+                      ) : (
+                        <span className="text-lg">{subscription.icon}</span>
+                      )}
                     </div>
-                  </div>
+                  )}
 
-                    <div className="flex items-center gap-4 text-sm text-neutral-500 dark:text-neutral-400">
-                    <div className="text-right flex items-center gap-2">
-                        <div className="font-bold whitespace-nowrap">
-                          {formatCurrency(subscription.amount, subscription.currency)}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-3 mb-1">
+                      <h3 className="font-semibold truncate">{subscription.name}</h3>
+                      <div className="flex items-center gap-2">
+                        
+                        <Badge className={getFrequencyColor(subscription.frequency)}>{subscription.frequency}</Badge>
+                      </div>
+                    </div>
+
+                      <div className="flex items-center gap-4 text-sm text-neutral-700 dark:text-neutral-400">
+                      <div className="text-right flex items-center gap-2">
+                          <div className="font-bold whitespace-nowrap">
+                            {formatCurrency(subscription.amount, subscription.currency)}
+                          </div>
+                          {subscription.currency !== "SAR" && (
+                            <div className="text-xs text-neutral-700 dark:text-neutral-400">
+                              ≈ {formatInSAR(subscription.amount, subscription.currency)}
+                            </div>
+                          )}
                         </div>
-                        {subscription.currency !== "SAR" && (
-                          <div className="text-xs text-neutral-500 dark:text-neutral-400">
-                            ≈ {formatInSAR(subscription.amount, subscription.currency)}
+                                               <div className="flex items-center gap-2">
+                           <span>{formatNextPayment(subscription.nextPayment, subscription.frequency)}</span>
+                           {isPaymentOverdue(subscription.nextPayment) && subscription.autoRenewal === false && (
+                             <Badge variant="destructive" className="text-xs">Overdue</Badge>
+                           )}
+                         </div>
+
+                        {subscription.autoRenewal !== false && (
+                          <div className="flex items-center gap-1 text-green-800 dark:text-green-400">
+                            <RotateCcw className="w-3 h-3" />
+                            <span className="text-xs">Auto</span>
                           </div>
                         )}
+
+                        {subscription.labels.length > 0 && (
+                          <div className="flex flex-wrap gap-1">
+                            {subscription.labels.map((label) => (
+                              <Badge key={label} className="text-xs border-0 bg-neutral-200 dark:bg-neutral-800 text-neutral-800 dark:text-neutral-200">
+                                {label}
+                              </Badge>
+                            ))}
+                          </div>
+                        )}
+
+                        {subscription.comment && <span className="truncate max-w-xs">{subscription.comment}</span>}
                       </div>
-                                             <div className="flex items-center gap-2">
-                         <span>{formatNextPayment(subscription.nextPayment, subscription.frequency)}</span>
-                         {isPaymentOverdue(subscription.nextPayment) && subscription.autoRenewal === false && (
-                           <Badge variant="destructive" className="text-xs">Overdue</Badge>
-                         )}
-                       </div>
+                  </div>
+                </div>
 
-                      {subscription.autoRenewal !== false && (
-                        <div className="flex items-center gap-1 text-green-600 dark:text-green-400">
-                          <RotateCcw className="w-3 h-3" />
-                          <span className="text-xs">Auto</span>
-                        </div>
-                      )}
+                <div className="justify-end flex self-end items-center gap-1 lg:gap-2 flex-shrink-0">
+                  {subscription.url && (
+                    <Button variant="ghost" size="sm" asChild>
+                      <a href={subscription.url} target="_blank" rel="noopener noreferrer">
+                        <ExternalLink className="lg:w-3 lg:h-3 w-2 h-2" />
+                      </a>
+                    </Button>
+                  )}
 
-                      {subscription.labels.length > 0 && (
-                        <div className="flex flex-wrap gap-1">
-                          {subscription.labels.map((label) => (
-                            <Badge key={label} variant="outline" className="text-xs">
-                              {label}
-                            </Badge>
-                          ))}
-                        </div>
-                      )}
-
-                      {subscription.comment && <span className="truncate max-w-xs">{subscription.comment}</span>}
-                    </div>
+                  <SubscriptionModal
+                    subscription={subscription}
+                    onSave={onUpdate}
+                    trigger={
+                      <Button variant="ghost" size="sm">
+                        <Edit className="lg:w-4 lg:h-4 w-3 h-3" />
+                      </Button>
+                    }
+                  />
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleDelete(subscription.id)}
+                    disabled={deletingId === subscription.id}
+                  >
+                    <Trash2 className="lg:w-4 lg:h-4 w-3 h-3" />
+                  </Button>
                 </div>
               </div>
-
-              <div className="justify-end flex self-end items-center gap-1 lg:gap-2 flex-shrink-0">
-                {subscription.url && (
-                  <Button variant="outline" size="sm" asChild>
-                    <a href={subscription.url} target="_blank" rel="noopener noreferrer">
-                      <ExternalLink className="lg:w-3 lg:h-3 w-2 h-2" />
-                    </a>
-                  </Button>
-                )}
-
-                <SubscriptionModal
-                  subscription={subscription}
-                  onSave={onUpdate}
-                  trigger={
-                    <Button variant="ghost" size="sm">
-                      <Edit className="lg:w-4 lg:h-4 w-3 h-3" />
-                    </Button>
-                  }
-                />
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => handleDelete(subscription.id)}
-                  disabled={deletingId === subscription.id}
-                >
-                  <Trash2 className="lg:w-4 lg:h-4 w-3 h-3" />
-                </Button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      ))}
+            </CardContent>
+          </Card>
+        )
+      })}
     </div>
   )
 }

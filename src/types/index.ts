@@ -12,6 +12,14 @@ export interface Subscription {
   comment?: string
   labels: string[]
   autoRenewal: boolean
+  colors?: {
+    Vibrant?: string
+    Muted?: string
+    DarkVibrant?: string
+    DarkMuted?: string
+    LightVibrant?: string
+    LightMuted?: string
+  }
   createdAt: string
   updatedAt: string
 }
@@ -38,6 +46,14 @@ export interface SubscriptionFormData {
   comment: string
   labels: string[]
   autoRenewal: boolean
+  colors?: {
+    Vibrant?: string
+    Muted?: string
+    DarkVibrant?: string
+    DarkMuted?: string
+    LightVibrant?: string
+    LightMuted?: string
+  }
 }
 
 // Sorting Types
