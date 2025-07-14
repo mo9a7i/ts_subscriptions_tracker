@@ -1,5 +1,4 @@
 import { Vibrant } from 'node-vibrant/browser'
-import { fetchImageAsDataUrl } from './server-actions'
 
 export interface ExtractedColors {
   Vibrant?: string
@@ -86,6 +85,37 @@ function isSVGFile(imageUrl: string): boolean {
   return imageUrl.toLowerCase().includes('.svg')
 }
 
+// Client-side CORS proxy for static deployments
+async function fetchImageViaProxy(imageUrl: string): Promise<string | null> {
+  const corsProxies = [
+    'https://api.allorigins.win/raw?url=',
+    'https://cors-anywhere.herokuapp.com/',
+    'https://proxy.cors.sh/',
+  ]
+  
+  for (const proxy of corsProxies) {
+    try {
+      const proxyUrl = proxy + encodeURIComponent(imageUrl)
+      const response = await fetch(proxyUrl)
+      
+      if (response.ok) {
+        const blob = await response.blob()
+        return new Promise((resolve) => {
+          const reader = new FileReader()
+          reader.onload = () => resolve(reader.result as string)
+          reader.onerror = () => resolve(null)
+          reader.readAsDataURL(blob)
+        })
+      }
+    } catch (error) {
+      console.log(`Proxy ${proxy} failed:`, error)
+      continue
+    }
+  }
+  
+  return null
+}
+
 export async function extractColorsFromImage(imageUrl: string, serviceName?: string): Promise<ExtractedColors> {
   try {
     let processedImageUrl = imageUrl
@@ -96,19 +126,19 @@ export async function extractColorsFromImage(imageUrl: string, serviceName?: str
       return serviceName ? getServiceColorsByName(serviceName) || {} : {}
     }
     
-    // For external URLs, fetch server-side to avoid CORS
+    // For external URLs, try CORS proxy for static deployments
     if (isExternalUrl(imageUrl) && !isDataUrl(imageUrl)) {
       try {
-        console.log('Fetching external image server-side:', imageUrl)
-        const dataUrl = await fetchImageAsDataUrl(imageUrl)
+        console.log('Fetching external image via CORS proxy:', imageUrl)
+        const dataUrl = await fetchImageViaProxy(imageUrl)
         if (dataUrl) {
           processedImageUrl = dataUrl
         } else {
-          console.log('Failed to fetch external image, trying brand colors')
+          console.log('Failed to fetch external image via proxy, using brand colors')
           return serviceName ? getServiceColorsByName(serviceName) || {} : {}
         }
       } catch (error) {
-        console.log('Server-side image fetch failed, trying brand colors:', error)
+        console.log('CORS proxy failed, using brand colors:', error)
         return serviceName ? getServiceColorsByName(serviceName) || {} : {}
       }
     }
@@ -126,7 +156,7 @@ export async function extractColorsFromImage(imageUrl: string, serviceName?: str
     
     return colors
   } catch (error) {
-    console.log('Color extraction failed, trying brand colors:', error)
+    console.log('Color extraction failed, using brand colors:', error)
     return serviceName ? getServiceColorsByName(serviceName) || {} : {}
   }
 }
