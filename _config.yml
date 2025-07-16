@@ -1,1 +1,36 @@
- 
+title: SubTracker
+description: Privacy-first subscription tracking - now at our new home
+url: https://mo9a7i.github.io
+baseurl: /ts_subscriptions_tracker
+
+# GitHub Pages safe plugins
+plugins:
+  - jekyll-redirect-from
+  - jekyll-sitemap
+  - jekyll-feed
+
+# GitHub Pages settings
+remote_theme: pages-themes/minimal@v0.2.0
+
+# Redirect settings
+redirect_from:
+  json: false
+
+# Exclude files from processing
+exclude:
+  - README.md
+  - Gemfile
+  - Gemfile.lock
+  - node_modules
+  - vendor
+
+# Markdown settings
+markdown: kramdown
+highlighter: rouge
+
+# Default settings
+defaults:
+  - scope:
+      path: ""
+    values:
+      layout: default

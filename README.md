@@ -19,7 +19,7 @@ Update the redirect URL in:
 - `index.md` - Main redirect
 - `404.md` - Fallback redirect
 
-Replace `https://your-new-k8s-domain.com` with your actual domain.
+Replace `https://subtracker.mo9a7i.com` with your actual domain.
 
 ## GitHub Pages Setup
 
