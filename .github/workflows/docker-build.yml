@@ -4,8 +4,42 @@ on:
   push:
     branches: [ main ]
     tags: [ 'v*' ]
+    paths-ignore:
+      - 'k8s/**'
+      - 'docs/**'
+      - '*.md'
+      - 'README.md'
+      - 'CONTRIBUTING.md'
+      - 'LICENSE'
+      - '.gitignore'
+      - '.dockerignore'
+      - 'docker-compose.yml'
+      - 'docker-compose.*.yml'
+      - '.vscode/**'
+      - '.cursor/**'
+      - '.github/ISSUE_TEMPLATE/**'
+      - '.github/pull_request_template.md'
+      - '**/*.example'
+      - 'scripts/**'
   pull_request:
     branches: [ main ]
+    paths-ignore:
+      - 'k8s/**'
+      - 'docs/**'
+      - '*.md'
+      - 'README.md'
+      - 'CONTRIBUTING.md'
+      - 'LICENSE'
+      - '.gitignore'
+      - '.dockerignore'
+      - 'docker-compose.yml'
+      - 'docker-compose.*.yml'
+      - '.vscode/**'
+      - '.cursor/**'
+      - '.github/ISSUE_TEMPLATE/**'
+      - '.github/pull_request_template.md'
+      - '**/*.example'
+      - 'scripts/**'
   workflow_dispatch:
 
 env:

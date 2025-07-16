@@ -1,0 +1,26 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: subtracker-ingress
+  namespace: subtracker
+  annotations:
+    cert-manager.io/cluster-issuer: http01-clusterissuer
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - subtracker.mo9a7i.com
+      secretName: subtracker-tls
+  rules:
+  - host: subtracker.mo9a7i.com
+    http:
+      paths:
+        - path: /
+          pathType: Prefix
+          backend:
+            service:
+              name: subtracker
+              port:
+                number: 3000
