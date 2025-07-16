@@ -85,36 +85,7 @@ function isSVGFile(imageUrl: string): boolean {
   return imageUrl.toLowerCase().includes('.svg')
 }
 
-// Client-side CORS proxy for static deployments
-async function fetchImageViaProxy(imageUrl: string): Promise<string | null> {
-  const corsProxies = [
-    'https://api.allorigins.win/raw?url=',
-    'https://cors-anywhere.herokuapp.com/',
-    'https://proxy.cors.sh/',
-  ]
-  
-  for (const proxy of corsProxies) {
-    try {
-      const proxyUrl = proxy + encodeURIComponent(imageUrl)
-      const response = await fetch(proxyUrl)
-      
-      if (response.ok) {
-        const blob = await response.blob()
-        return new Promise((resolve) => {
-          const reader = new FileReader()
-          reader.onload = () => resolve(reader.result as string)
-          reader.onerror = () => resolve(null)
-          reader.readAsDataURL(blob)
-        })
-      }
-    } catch (error) {
-      console.log(`Proxy ${proxy} failed:`, error)
-      continue
-    }
-  }
-  
-  return null
-}
+// CORS proxy logic removed - favicon service handles CORS directly
 
 export async function extractColorsFromImage(imageUrl: string, serviceName?: string): Promise<ExtractedColors> {
   try {
@@ -126,22 +97,8 @@ export async function extractColorsFromImage(imageUrl: string, serviceName?: str
       return serviceName ? getServiceColorsByName(serviceName) || {} : {}
     }
     
-    // For external URLs, try CORS proxy for static deployments
-    if (isExternalUrl(imageUrl) && !isDataUrl(imageUrl)) {
-      try {
-        console.log('Fetching external image via CORS proxy:', imageUrl)
-        const dataUrl = await fetchImageViaProxy(imageUrl)
-        if (dataUrl) {
-          processedImageUrl = dataUrl
-        } else {
-          console.log('Failed to fetch external image via proxy, using brand colors')
-          return serviceName ? getServiceColorsByName(serviceName) || {} : {}
-        }
-      } catch (error) {
-        console.log('CORS proxy failed, using brand colors:', error)
-        return serviceName ? getServiceColorsByName(serviceName) || {} : {}
-      }
-    }
+    // External URLs can be used directly - favicon service handles CORS
+    // processedImageUrl is already set to imageUrl above
 
     const palette = await Vibrant.from(processedImageUrl).getPalette()
     

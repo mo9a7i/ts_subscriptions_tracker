@@ -12,13 +12,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Plus, Upload, X } from "lucide-react";
-import { db } from "@/lib/db";
 import { getKnownService } from "@/lib/known-services";
 import { fetchFaviconAsDataUrl } from "@/lib/favicon";
 import { extractColorsFromImage } from "@/lib/color-utils";
 import type { Subscription, SubscriptionModalProps, SubscriptionFormData, SubscriptionFrequency } from "@/types";
+import type { WorkspaceDatabase } from "@/lib/workspace-db";
 
-export function SubscriptionModal({ subscription, onSave, trigger }: SubscriptionModalProps) {
+export function SubscriptionModal({ subscription, onSave, trigger, workspaceDB, onDeleteStart, onDeleteEnd }: SubscriptionModalProps) {
     const [open, setOpen] = useState(false);
     const [formData, setFormData] = useState<SubscriptionFormData>({
         name: "",
@@ -47,7 +47,7 @@ export function SubscriptionModal({ subscription, onSave, trigger }: Subscriptio
             try {
                 const colors = await extractColorsFromImage(subscription.icon, subscription.name);
                 if (Object.keys(colors).length > 0) {
-                    await db.updateSubscription(subscription.id, { colors });
+                    await workspaceDB!.updateSubscription(subscription.id, { colors });
                     setFormData((prev) => ({ ...prev, colors }));
                 }
             } catch (error) {
@@ -93,10 +93,17 @@ export function SubscriptionModal({ subscription, onSave, trigger }: Subscriptio
         }
         setValidationErrors({});
         loadLabels();
-    }, [subscription, open]);
+    }, [subscription]);
+
+    // Reset form when modal closes - but only for new subscriptions
+    useEffect(() => {
+        if (!open && !subscription) {
+            resetForm();
+        }
+    }, [open, subscription]);
 
     const loadLabels = async () => {
-        const uniqueLabels = await db.getAllUniqueLabels();
+        const uniqueLabels = await workspaceDB!.getAllUniqueLabels();
         setAvailableLabels(uniqueLabels);
     };
 
@@ -170,7 +177,16 @@ export function SubscriptionModal({ subscription, onSave, trigger }: Subscriptio
             try {
                 const favicon = await fetchFaviconAsDataUrl(url);
                 if (favicon) {
+                    // Store the favicon service URL directly (e.g., https://newfav.mohannad-otaibi.workers.dev/?url=...)
                     setFormData((prev) => ({ ...prev, icon: favicon }));
+                    
+                    // Extract colors from the favicon service URL (no CORS issues)
+                    try {
+                        const colors = await extractColorsFromImage(favicon, formData.name);
+                        setFormData((prev) => ({ ...prev, colors }));
+                    } catch (error) {
+                        console.error("Failed to extract colors from favicon:", error);
+                    }
                 }
             } catch (error) {
                 console.log("Could not fetch favicon:", error);
@@ -225,9 +241,9 @@ export function SubscriptionModal({ subscription, onSave, trigger }: Subscriptio
 
         try {
             if (subscription) {
-                await db.updateSubscription(subscription.id, subscriptionData);
+                await workspaceDB!.updateSubscription(subscription.id, subscriptionData);
             } else {
-                await db.addSubscription(subscriptionData);
+                await workspaceDB!.addSubscription(subscriptionData);
             }
 
             onSave();
@@ -256,13 +272,15 @@ export function SubscriptionModal({ subscription, onSave, trigger }: Subscriptio
 
         try {
             setIsDeleting(true);
-            await db.deleteSubscription(subscription.id);
+            onDeleteStart?.();
+            await workspaceDB!.deleteSubscription(subscription.id);
             onSave(); // Refresh the list
             setOpen(false); // Close modal
         } catch (error) {
             console.error("Error deleting subscription:", error);
         } finally {
             setIsDeleting(false);
+            onDeleteEnd?.();
         }
     };
 

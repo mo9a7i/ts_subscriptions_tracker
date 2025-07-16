@@ -23,7 +23,7 @@ import type { Subscription, CreateSubscriptionData } from "@/types"
             subscriptionStore.createIndex("name", "name", { unique: false })
             subscriptionStore.createIndex("nextPayment", "nextPayment", { unique: false })
           }
-
+  
           // Remove labels table if it exists (migration from v1 to v2)
           if (db.objectStoreNames.contains("labels")) {
             db.deleteObjectStore("labels")
@@ -62,7 +62,7 @@ import type { Subscription, CreateSubscriptionData } from "@/types"
           const updatedSubscription = {
             ...subscription,
             ...updates,
-            autoRenewal: subscription.autoRenewal ?? true, // Ensure backward compatibility
+            autoRenewal: updates.autoRenewal ?? subscription.autoRenewal ?? true, // Use updated value or fallback to existing/default
             id: subscription.id, // Ensure id is preserved
             updatedAt: new Date().toISOString(),
           }
@@ -101,7 +101,7 @@ import type { Subscription, CreateSubscriptionData } from "@/types"
     const allLabels = subscriptions.flatMap(sub => sub.labels || [])
     const uniqueLabels = [...new Set(allLabels)]
     return uniqueLabels.sort()
-  }
+    }
   }
   
   export const db = new SubscriptionDB()

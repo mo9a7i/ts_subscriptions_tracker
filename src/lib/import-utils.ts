@@ -1,5 +1,5 @@
 import type { Subscription } from '@/types'
-import { db } from '@/lib/db'
+import type { WorkspaceDatabase } from '@/lib/workspace-db'
 
 export interface ImportResult {
   success: boolean
@@ -27,7 +27,7 @@ export function validateSubscriptionData(data: any): data is Subscription {
   )
 }
 
-export async function importFromJSON(jsonData: string): Promise<ImportResult> {
+export async function importFromJSON(jsonData: string, workspaceDB: WorkspaceDatabase): Promise<ImportResult> {
   const result: ImportResult = {
     success: false,
     imported: 0,
@@ -55,8 +55,8 @@ export async function importFromJSON(jsonData: string): Promise<ImportResult> {
     }
 
     // Get existing subscriptions to check for duplicates
-    const existingSubscriptions = await db.getAllSubscriptions()
-    const existingIds = new Set(existingSubscriptions.map(sub => sub.id))
+    const existingSubscriptions = await workspaceDB.getAllSubscriptions()
+    const existingIds = new Set(existingSubscriptions.map((sub: Subscription) => sub.id))
 
     // Process each subscription
     for (let i = 0; i < subscriptions.length; i++) {
@@ -77,7 +77,7 @@ export async function importFromJSON(jsonData: string): Promise<ImportResult> {
 
       try {
         // Add subscription to database
-        await db.addSubscription({
+        await workspaceDB.addSubscription({
           name: subscription.name,
           amount: subscription.amount,
           currency: subscription.currency,

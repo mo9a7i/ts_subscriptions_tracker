@@ -14,19 +14,22 @@ import { exportToJSON, exportToXLSX } from "@/lib/export-utils"
 import { importFromJSON, triggerFileInput, type ImportResult } from "@/lib/import-utils"
 import { ImportResultsDialog } from "@/components/import-results-dialog"
 import type { Subscription } from "@/types"
+import type { WorkspaceDatabase } from "@/lib/workspace-db"
 
 interface ExportDropdownProps {
   subscriptions: Subscription[]
   filteredSubscriptions?: Subscription[]
   selectedLabels?: string[]
   onImportComplete?: () => void
+  workspaceDB?: WorkspaceDatabase
 }
 
 export function ExportDropdown({ 
   subscriptions, 
   filteredSubscriptions = [], 
   selectedLabels = [],
-  onImportComplete
+  onImportComplete,
+  workspaceDB
 }: ExportDropdownProps) {
   const [importResult, setImportResult] = useState<ImportResult | null>(null)
   const [showImportResults, setShowImportResults] = useState(false)
@@ -54,7 +57,7 @@ export function ExportDropdown({
     try {
       setIsImporting(true)
       const jsonData = await triggerFileInput()
-      const result = await importFromJSON(jsonData)
+      const result = await importFromJSON(jsonData, workspaceDB!)
       
       setImportResult(result)
       setShowImportResults(true)

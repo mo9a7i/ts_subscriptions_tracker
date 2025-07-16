@@ -96,4 +96,4 @@ pnpm lint
 - Ask questions in pull request reviews
 - Check the project documentation and README
 
-Thank you for contributing to Subscription Tracker! 
+Thank you for contributing to Subscription Tracker!

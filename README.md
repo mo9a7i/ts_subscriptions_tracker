@@ -25,32 +25,35 @@ A modern web application for tracking and managing your subscriptions built with
 
 ### Prerequisites
 
-- Node.js 18+ 
+- Node.js 18+
 - pnpm (recommended)
 
 ### Installation
 
 1. Clone the repository:
-```bash
-git clone <repository-url>
-cd ts_subscriptions_tracker
-```
+
+    ```bash
+    git clone <repository-url>
+    cd ts_subscriptions_tracker
+    ```
 
 2. Install dependencies:
-```bash
-pnpm install
-```
+
+    ```bash
+    pnpm install
+    ```
 
 3. Start the development server:
-```bash
-pnpm dev
-```
+
+    ```bash
+    pnpm dev
+    ```
 
 4. Open [http://localhost:3000](http://localhost:3000) in your browser
 
 ## Project Structure
 
-```
+```bash
 src/
 ├── app/                    # Next.js app router pages
 │   ├── dashboard/         # Dashboard page
@@ -69,6 +72,7 @@ src/
 ## Database Schema
 
 ### Subscriptions Table
+
 - `id`: Primary key
 - `name`: Service name
 - `cost`: Monthly cost

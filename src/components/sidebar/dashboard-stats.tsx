@@ -60,6 +60,7 @@ export function DashboardStats({ subscriptions, filteredSubscriptions }: Dashboa
 
   return (
     <div className="grid gap-3 grid-cols-1">
+      {/* Always show total subscriptions */}
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1">
           <CardTitle className="text-xs font-medium">
@@ -75,37 +76,42 @@ export function DashboardStats({ subscriptions, filteredSubscriptions }: Dashboa
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1">
-          <CardTitle className="text-xs font-medium">This Month</CardTitle>
-          <Calendar className="h-3 w-3 text-neutral-500 dark:text-neutral-400" />
-        </CardHeader>
-        <CardContent className="pb-2">
-          <div className="text-lg font-bold">{formatCurrency(thisMonthPayments, "SAR")}</div>
-          <p className="text-xs text-neutral-500 dark:text-neutral-400">
-            {filteredSubscriptions.length > 0 ? "Filtered payments due" : "Total payments due this month"}
-          </p>
-          <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-1">
-            Expected until month end: {formatCurrency(expectedCostToEndOfMonth, "SAR")}
-          </p>
-        </CardContent>
-      </Card>
+      {/* Only show monthly and yearly cards if there are subscriptions */}
+      {subscriptions.length > 0 && (
+        <>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1">
+              <CardTitle className="text-xs font-medium">This Month</CardTitle>
+              <Calendar className="h-3 w-3 text-neutral-500 dark:text-neutral-400" />
+            </CardHeader>
+            <CardContent className="pb-2">
+              <div className="text-lg font-bold">{formatCurrency(thisMonthPayments, "SAR")}</div>
+              <p className="text-xs text-neutral-500 dark:text-neutral-400">
+                {filteredSubscriptions.length > 0 ? "Filtered payments due" : "Total payments due this month"}
+              </p>
+              <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-1">
+                Expected until month end: {formatCurrency(expectedCostToEndOfMonth, "SAR")}
+              </p>
+            </CardContent>
+          </Card>
 
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1">
-          <CardTitle className="text-xs font-medium">Yearly Total</CardTitle>
-          <TrendingUp className="h-3 w-3 text-neutral-500 dark:text-neutral-400" />
-        </CardHeader>
-        <CardContent className="pb-2">
-          <div className="text-lg font-bold">{formatCurrency(yearlyTotal, "SAR")}</div>
-          <p className="text-xs text-neutral-500 dark:text-neutral-400">
-            {filteredSubscriptions.length > 0 ? "Filtered annual cost" : "Annual subscription cost"}
-          </p>
-          <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-1">
-            Monthly equivalent: {formatCurrency(monthlyTotal, "SAR")}
-          </p>
-        </CardContent>
-      </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1">
+              <CardTitle className="text-xs font-medium">Yearly Total</CardTitle>
+              <TrendingUp className="h-3 w-3 text-neutral-500 dark:text-neutral-400" />
+            </CardHeader>
+            <CardContent className="pb-2">
+              <div className="text-lg font-bold">{formatCurrency(yearlyTotal, "SAR")}</div>
+              <p className="text-xs text-neutral-500 dark:text-neutral-400">
+                {filteredSubscriptions.length > 0 ? "Filtered annual cost" : "Annual subscription cost"}
+              </p>
+              <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-1">
+                Monthly equivalent: {formatCurrency(monthlyTotal, "SAR")}
+              </p>
+            </CardContent>
+          </Card>
+        </>
+      )}
     </div>
   )
 }

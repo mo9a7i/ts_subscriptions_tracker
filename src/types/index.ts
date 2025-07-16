@@ -52,14 +52,17 @@ export interface SubscriptionFormData {
 }
 
 // Sorting Types
-export type SortOption = "nextPayment" | "name" | "amount"
-export type SortOrder = "asc" | "desc"
+export type SortOption = "nextPayment-asc" | "nextPayment-desc" | "name-asc" | "name-desc" | "amount-asc" | "amount-desc"
+// Remove the SortOrder type as it's now integrated into SortOption
 
 // Component Props Types
 export interface SubscriptionModalProps {
   subscription?: Subscription
   onSave: () => void
   trigger?: React.ReactNode
+  workspaceDB?: any // WorkspaceDatabase type will be imported when used
+  onDeleteStart?: () => void
+  onDeleteEnd?: () => void
 }
 
 export interface SubscriptionListProps {
@@ -67,7 +70,8 @@ export interface SubscriptionListProps {
   onUpdate: () => void
   selectedLabels: string[]
   sortBy: SortOption
-  sortOrder: SortOrder
+  workspaceDB?: any // WorkspaceDatabase type will be imported when used
+  readonly?: boolean
 }
 
 export interface DashboardStatsProps {
@@ -80,6 +84,7 @@ export interface SidebarProps {
   onLabelsChange: (labels: string[]) => void
   subscriptions: Subscription[]
   filteredSubscriptions: Subscription[]
+  workspaceDB?: any // WorkspaceDatabase type will be imported when used
 }
 
 // Utility Types

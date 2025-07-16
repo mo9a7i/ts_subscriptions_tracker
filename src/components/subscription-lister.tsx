@@ -1,49 +1,62 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Edit, Ellipsis, RotateCcw } from "lucide-react";
-import { db } from "@/lib/db";
+import { Edit, Ellipsis, RotateCcw, Loader2 } from "lucide-react";
 import { SubscriptionModal } from "@/components/subscription-modal";
 import { formatCurrency, formatInSAR, getCurrencySymbol } from "@/lib/currency";
 import { formatNextPayment, getNextPaymentDate, isPaymentOverdue } from "@/lib/date-utils";
 import { getBestColorForBackground } from "@/lib/color-utils";
-import type { Subscription, SubscriptionListProps } from "@/types";
+import { SubscriptionEmptyState } from "@/components/common/empty-state";
+import type { Subscription, SubscriptionListProps, SortOption } from "@/types";
+import type { WorkspaceDatabase } from "@/lib/workspace-db";
 import Link from "next/link";
 
-export function SubscriptionList({ subscriptions, onUpdate, selectedLabels, sortBy, sortOrder }: SubscriptionListProps) {
-    // Check and update overdue subscriptions when component loads or subscriptions change
+export function SubscriptionList({ subscriptions, onUpdate, selectedLabels, sortBy, workspaceDB, readonly = false }: SubscriptionListProps) {
+    const [deletingSubscriptionId, setDeletingSubscriptionId] = useState<string | null>(null);
+    const [hasCheckedOverdue, setHasCheckedOverdue] = useState(false);
+
+    // Check and update overdue subscriptions only once per session
     useEffect(() => {
         const checkOverdueSubscriptions = async () => {
+            // Skip if readonly mode, already checked this session, no workspaceDB, or no subscriptions
+            if (readonly || hasCheckedOverdue || !workspaceDB || subscriptions.length === 0) return;
+            
             let hasUpdates = false;
+            const updates: Promise<void>[] = [];
+            
             for (const subscription of subscriptions) {
                 if (isPaymentOverdue(subscription.nextPayment) && subscription.autoRenewal !== false) {
                     const newNextPayment = getNextPaymentDate(subscription.nextPayment, subscription.frequency);
                     if (newNextPayment !== subscription.nextPayment) {
-                        await db.updateSubscription(subscription.id, { nextPayment: newNextPayment });
+                        // Batch updates instead of sequential
+                        updates.push(workspaceDB!.updateSubscription(subscription.id, { nextPayment: newNextPayment }));
                         hasUpdates = true;
                     }
                 }
             }
+            
             if (hasUpdates) {
+                // Execute all updates in parallel
+                await Promise.all(updates);
                 onUpdate(); // Refresh the list once after all updates
+                setHasCheckedOverdue(true); // Mark as checked for this session
             }
         };
 
-        if (subscriptions.length > 0) {
-            checkOverdueSubscriptions();
-        }
-    }, [subscriptions.length]); // Only run when subscriptions array length changes
+        checkOverdueSubscriptions();
+    }, [subscriptions.length, hasCheckedOverdue, workspaceDB, onUpdate]); // More specific dependencies
 
     const filteredSubscriptions = selectedLabels.length > 0 ? subscriptions.filter((sub) => sub.labels.some((label) => selectedLabels.includes(label))) : subscriptions;
 
     // Sort subscriptions
     const sortedSubscriptions = [...filteredSubscriptions].sort((a, b) => {
+        const [field, order] = sortBy.split('-') as [string, 'asc' | 'desc'];
         let comparison = 0;
 
-        switch (sortBy) {
+        switch (field) {
             case "nextPayment":
                 comparison = new Date(a.nextPayment).getTime() - new Date(b.nextPayment).getTime();
                 break;
@@ -58,7 +71,7 @@ export function SubscriptionList({ subscriptions, onUpdate, selectedLabels, sort
                 break;
         }
 
-        return sortOrder === "desc" ? -comparison : comparison;
+        return order === "desc" ? -comparison : comparison;
     });
 
     const getFrequencyColor = (frequency: string) => {
@@ -76,15 +89,60 @@ export function SubscriptionList({ subscriptions, onUpdate, selectedLabels, sort
         }
     };
 
+    const handleDeleteStart = (subscriptionId: string) => {
+        setDeletingSubscriptionId(subscriptionId);
+    };
+
+    const handleDeleteEnd = () => {
+        setDeletingSubscriptionId(null);
+        onUpdate(); // Refresh the list
+    };
+
+    // Show empty state if no subscriptions exist
+    if (sortedSubscriptions.length === 0) {
+        if (readonly) {
+            return (
+                <div className="text-center py-12">
+                    <p className="text-muted-foreground mb-4">This shared workspace has no subscriptions yet.</p>
+                </div>
+            );
+        }
+        
+        return (
+            <SubscriptionEmptyState 
+                onAddSubscription={onUpdate}
+                workspaceDB={workspaceDB}
+            />
+        );
+    }
+
     return (
         <div className="space-y-1 lg:space-y-2">
             {sortedSubscriptions.map((subscription) => {
                 const backgroundColorOverlay = subscription.colors ? getBestColorForBackground(subscription.colors) : null;
+                const isDeleting = deletingSubscriptionId === subscription.id;
 
                 return (
-                    <Card key={subscription.id} className="relative rounded-md border-0 py-2 overflow-hidden">
-                        {backgroundColorOverlay && <div className="absolute inset-0 opacity-40" style={{ backgroundColor: backgroundColorOverlay }} />}
-                        <div className="absolute inset-0 bg-gradient-to-b from-white/20 to-black/10 dark:from-white/10 dark:to-black/10" />
+                    <Card 
+                        key={subscription.id} 
+                        className={`relative rounded-md border-0 py-2 overflow-hidden transition-all duration-200 ${
+                            isDeleting 
+                                ? 'opacity-50 pointer-events-none bg-destructive/5 border-destructive/20' 
+                                : ''
+                        }`}
+                    >
+                        {backgroundColorOverlay && <div className="absolute inset-0 opacity-50" style={{ backgroundColor: backgroundColorOverlay }} />}
+                        <div className="absolute inset-0 " />
+
+                        {/* Deleting overlay */}
+                        {isDeleting && (
+                            <div className="absolute inset-0 bg-background/80 flex items-center justify-center z-20">
+                                <div className="flex items-center gap-2 text-destructive">
+                                    <Loader2 className="w-4 h-4 animate-spin" />
+                                    <span className="text-sm font-medium">Deleting...</span>
+                                </div>
+                            </div>
+                        )}
 
                         <CardContent className="px-4 py-0 relative z-10">
                             <div className="gap-2 flex flex-col lg:flex-row items-start justify-between">
@@ -105,7 +163,7 @@ export function SubscriptionList({ subscriptions, onUpdate, selectedLabels, sort
                                             </div>
                                         </div>
 
-                                        <div className="flex items-center gap-4 text-xs text-neutral-700 dark:text-neutral-400">
+                                        <div className="flex items-center gap-4 text-xs text-neutral-900 dark:text-neutral-400">
                                             <div className="flex items-center gap-2">
                                                 <span>{formatNextPayment(subscription.nextPayment, subscription.frequency)}</span>
                                                 {isPaymentOverdue(subscription.nextPayment) && subscription.autoRenewal === false && (
@@ -143,17 +201,22 @@ export function SubscriptionList({ subscriptions, onUpdate, selectedLabels, sort
                                     </div>
                                 </div>
 
-                                <div className="justify-start flex self-start text-xs items-center gap-1 flex-shrink-0">
-                                    <SubscriptionModal
-                                        subscription={subscription}
-                                        onSave={onUpdate}
-                                        trigger={
-                                            <Button variant="ghost" size="sm">
-                                                <Ellipsis />
-                                            </Button>
-                                        }
-                                    />
-                                </div>
+                                {!readonly && (
+                                    <div className="justify-start flex self-start text-xs items-center gap-1 flex-shrink-0">
+                                        <SubscriptionModal
+                                            subscription={subscription}
+                                            onSave={onUpdate}
+                                            workspaceDB={workspaceDB}
+                                            onDeleteStart={() => handleDeleteStart(subscription.id)}
+                                            onDeleteEnd={handleDeleteEnd}
+                                            trigger={
+                                                <Button variant="ghost" size="sm" disabled={isDeleting}>
+                                                    <Ellipsis />
+                                                </Button>
+                                            }
+                                        />
+                                    </div>
+                                )}
                             </div>
                         </CardContent>
                     </Card>
