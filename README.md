@@ -106,7 +106,7 @@ This project is open source and available under the [MIT License](LICENSE).
 ### Project Links
 
 - **GitHub Repository**: [https://github.com/mo9a7i/ts_subscriptions_tracker](https://github.com/mo9a7i/ts_subscriptions_tracker)
-- **Project Page**: [https://mo9a7i.github.io/ts_subscriptions_tracker/](https://mo9a7i.github.io/ts_subscriptions_tracker/)
+- **Project Page**: [https://subtracker.mo9a7i.com/](https://subtracker.mo9a7i.com/)
 
 ### Feedback & Bug Reports
 
