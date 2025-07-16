@@ -23,7 +23,7 @@ export const metadata: Metadata = {
     description: "Privacy-first subscription tracker with smart sorting, auto-detection, and cost awareness tools. Track and optimize all your recurring payments.",
     images: [
       {
-        url: "/screenshots/dark_image.png",
+        url: "https://subtracker.mo9a7i.com/screenshots/dark_image.png",
         width: 1200,
         height: 630,
         alt: "SubTracker - Subscription Management Dashboard",
@@ -34,7 +34,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "SubTracker - Smart Subscription Management & Cost Awareness",
     description: "Privacy-first subscription tracker with smart sorting, auto-detection, and cost awareness tools.",
-    images: ["/screenshots/dark_image.png"],
+    images: ["https://subtracker.mo9a7i.com/screenshots/dark_image.png"],
   },
   robots: {
     index: true,

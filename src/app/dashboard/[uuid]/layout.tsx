@@ -27,7 +27,7 @@ export async function generateMetadata({ params }: { params: Promise<{ uuid: str
       openGraph: {
         title,
         description,
-        images: ["/screenshots/dark_image.png"],
+        images: ["https://subtracker.mo9a7i.com/screenshots/dark_image.png"],
         type: "website",
         url: `https://subtracker.mo9a7i.com/dashboard/${uuid}`,
       },
@@ -35,7 +35,7 @@ export async function generateMetadata({ params }: { params: Promise<{ uuid: str
         card: "summary_large_image",
         title,
         description,
-        images: ["/screenshots/dark_image.png"],
+        images: ["https://subtracker.mo9a7i.com/screenshots/dark_image.png"],
       },
       robots: {
         index: false, // Don't index individual workspace pages for privacy
@@ -50,14 +50,14 @@ export async function generateMetadata({ params }: { params: Promise<{ uuid: str
       openGraph: {
         title: "Workspace - SubTracker",
         description: "Manage your subscriptions with privacy-first tracking tools @ SubTracker",
-        images: ["/screenshots/dark_image.png"],
+        images: ["https://subtracker.mo9a7i.com/screenshots/dark_image.png"],
         type: "website",
       },
       twitter: {
         card: "summary_large_image",
         title: "Workspace - SubTracker",
         description: "Manage your subscriptions with privacy-first tracking tools @ SubTracker",
-        images: ["/screenshots/dark_image.png"],
+        images: ["https://subtracker.mo9a7i.com/screenshots/dark_image.png"],
       },
       robots: {
         index: false,
