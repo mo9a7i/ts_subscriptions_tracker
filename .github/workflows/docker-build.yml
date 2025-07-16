@@ -84,10 +84,10 @@ jobs:
       uses: docker/build-push-action@v5
       with:
         context: .
-        platforms: linux/amd64,linux/arm64
         push: ${{ github.event_name != 'pull_request' }}
         tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}
+        platforms: linux/amd64
         build-args: |
           NEXT_PUBLIC_SUPABASE_URL=${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY=${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
@@ -97,11 +97,3 @@ jobs:
           STACK_SECRET_SERVER_KEY=${{ secrets.STACK_SECRET_SERVER_KEY }}
         cache-from: type=gha
         cache-to: type=gha,mode=max
-
-    - name: Generate artifact attestation
-      uses: actions/attest-build-provenance@v1
-      if: github.event_name != 'pull_request'
-      with:
-        subject-name: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME}}
-        subject-digest: ${{ steps.build.outputs.digest }}
-        push-to-registry: true 
