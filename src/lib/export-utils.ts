@@ -3,7 +3,13 @@ import type { Subscription } from '@/types'
 import { formatInSAR } from '@/lib/currency'
 
 export function exportToJSON(subscriptions: Subscription[], filename = 'subscriptions') {
-  const dataStr = JSON.stringify(subscriptions, null, 2)
+  // Ensure labels are properly included in the export
+  const cleanSubscriptions = subscriptions.map(sub => ({
+    ...sub,
+    labels: sub.labels || [] // Ensure labels array exists
+  }))
+  
+  const dataStr = JSON.stringify(cleanSubscriptions, null, 2)
   const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr)
   
   const exportFileDefaultName = `${filename}-${new Date().toISOString().split('T')[0]}.json`
@@ -26,7 +32,7 @@ export function exportToXLSX(subscriptions: Subscription[], filename = 'subscrip
     'Start Date': sub.startDate || '',
     'Website': sub.url || '',
     'Auto Renewal': sub.autoRenewal ? 'Yes' : 'No',
-    'Labels': sub.labels.join(', '),
+    'Labels': (sub.labels || []).join(', '), // Ensure labels array exists and join with commas
     'Comment': sub.comment || '',
     'Created': new Date(sub.createdAt).toLocaleDateString(),
     'Updated': new Date(sub.updatedAt).toLocaleDateString()

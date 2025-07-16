@@ -61,4 +61,34 @@ export function isPaymentOverdue(date: string): boolean {
   const paymentDate = new Date(date)
   const now = new Date()
   return paymentDate < now
+}
+
+// Calendar helper functions
+export function getPaymentDatesForMonth(subscriptions: any[], year: number, month: number) {
+  const paymentDates = new Map<string, any[]>()
+  
+  subscriptions.forEach(subscription => {
+    const nextPayment = getNextPaymentDate(subscription.nextPayment, subscription.frequency)
+    const paymentDate = new Date(nextPayment)
+    
+    if (paymentDate.getFullYear() === year && paymentDate.getMonth() === month) {
+      const dateKey = `${year}-${String(month + 1).padStart(2, '0')}-${String(paymentDate.getDate()).padStart(2, '0')}`
+      
+      if (!paymentDates.has(dateKey)) {
+        paymentDates.set(dateKey, [])
+      }
+      
+      paymentDates.get(dateKey)!.push({
+        name: subscription.name,
+        amount: subscription.amount,
+        currency: subscription.currency
+      })
+    }
+  })
+  
+  return paymentDates
+}
+
+export function formatDateKey(date: Date): string {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
 } 

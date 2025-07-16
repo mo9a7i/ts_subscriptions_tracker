@@ -1,36 +1,119 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Subscription Tracker
+
+A modern web application for tracking and managing your subscriptions built with Next.js 15, TypeScript, and shadcn/ui.
+
+## Features
+
+- **Dashboard Overview**: View all subscriptions with payment calendar and statistics
+- **Subscription Management**: Add, edit, and delete subscriptions with detailed information
+- **Label System**: Organize subscriptions with custom labels for easy filtering
+- **Payment Calendar**: Visual calendar showing upcoming payment dates with hover tooltips
+- **Import/Export**: Support for CSV, JSON, and Excel formats
+- **Local Storage**: SQLite database for offline-first data management
+- **Dark/Light Theme**: Toggle between themes with system preference detection
+
+## Tech Stack
+
+- **Framework**: Next.js 15 with App Router
+- **Language**: TypeScript
+- **Styling**: Tailwind CSS
+- **UI Components**: shadcn/ui
+- **Database**: SQLite (via sql.js)
+- **Icons**: Lucide React
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
 
+- Node.js 18+ 
+- pnpm (recommended)
+
+### Installation
+
+1. Clone the repository:
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone <repository-url>
+cd ts_subscriptions_tracker
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. Install dependencies:
+```bash
+pnpm install
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+3. Start the development server:
+```bash
+pnpm dev
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+4. Open [http://localhost:3000](http://localhost:3000) in your browser
 
-## Learn More
+## Project Structure
 
-To learn more about Next.js, take a look at the following resources:
+```
+src/
+├── app/                    # Next.js app router pages
+│   ├── dashboard/         # Dashboard page
+│   └── layout.tsx         # Root layout
+├── components/            # React components
+│   ├── ui/               # shadcn/ui components
+│   ├── layout/           # Layout components
+│   └── [feature].tsx     # Feature components
+├── lib/                  # Utility functions
+│   ├── db.ts            # Database operations
+│   ├── export-utils.ts  # Export functionality
+│   └── utils.ts         # General utilities
+└── types/               # TypeScript type definitions
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Database Schema
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Subscriptions Table
+- `id`: Primary key
+- `name`: Service name
+- `cost`: Monthly cost
+- `billing_cycle`: Payment frequency
+- `next_payment`: Next payment date
+- `category`: Service category
+- `website_url`: Service website
+- `labels`: JSON array of labels
+- `notes`: Additional notes
+- `created_at`: Creation timestamp
+- `updated_at`: Last update timestamp
 
-## Deploy on Vercel
+## Contributing
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for detailed information on:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Development setup and workflow
+- Code style guidelines  
+- Database change procedures
+- Component development standards
+- Testing requirements
+- Pull request process
+- Issue reporting guidelines
+
+## License
+
+This project is open source and available under the [MIT License](LICENSE).
+
+## Community & Support
+
+### Project Links
+
+- **GitHub Repository**: [https://github.com/mo9a7i/ts_subscriptions_tracker](https://github.com/mo9a7i/ts_subscriptions_tracker)
+- **Project Page**: [https://mo9a7i.github.io/ts_subscriptions_tracker/](https://mo9a7i.github.io/ts_subscriptions_tracker/)
+
+### Feedback & Bug Reports
+
+We use UserJot for community feedback and issue tracking:
+
+- **Bug Reports**: [Report bugs and issues](https://subscriptionlister.userjot.com/board/bugs?cursor=1&order=top&limit=10)
+- **Feature Requests**: [Request new features](https://subscriptionlister.userjot.com/board/features)
+
+### Getting Help
+
+- Browse existing issues and feature requests on our UserJot boards
+- Submit bug reports with detailed reproduction steps
+- Vote on features you'd like to see implemented
+- For development questions, open an issue on [GitHub](https://github.com/mo9a7i/ts_subscriptions_tracker/issues)

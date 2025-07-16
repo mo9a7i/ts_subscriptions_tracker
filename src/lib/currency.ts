@@ -27,7 +27,7 @@ export function formatCurrency(amount: number, currency: string = "SAR"): string
     minimumFractionDigits: 2,
     maximumFractionDigits: 2
   })
-  return `${formattedAmount} ${symbol}`
+  return `${symbol} ${formattedAmount} `
 }
 
 export function formatInSAR(amount: number, fromCurrency: string): string {

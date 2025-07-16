@@ -24,12 +24,7 @@ export interface Subscription {
   updatedAt: string
 }
 
-export interface Label {
-  id: string
-  name: string
-  color: string
-  createdAt: string
-}
+
 
 // Form Types
 export type SubscriptionFrequency = "weekly" | "monthly" | "quarterly" | "yearly"
@@ -83,9 +78,11 @@ export interface DashboardStatsProps {
 export interface SidebarProps {
   selectedLabels: string[]
   onLabelsChange: (labels: string[]) => void
+  subscriptions: Subscription[]
+  filteredSubscriptions: Subscription[]
 }
 
 // Utility Types
 export type CreateSubscriptionData = Omit<Subscription, "id" | "createdAt" | "updatedAt">
 export type UpdateSubscriptionData = Partial<Subscription>
-export type CreateLabelData = Omit<Label, "id" | "createdAt"> 
+ 

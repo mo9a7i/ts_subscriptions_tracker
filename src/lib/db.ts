@@ -1,8 +1,8 @@
-import type { Subscription, Label, CreateSubscriptionData, CreateLabelData } from "@/types"
+import type { Subscription, CreateSubscriptionData } from "@/types"
   
   class SubscriptionDB {
     private dbName = "SubscriptionTracker"
-    private version = 1
+    private version = 2
     private db: IDBDatabase | null = null
   
     async init(): Promise<void> {
@@ -23,9 +23,10 @@ import type { Subscription, Label, CreateSubscriptionData, CreateLabelData } fro
             subscriptionStore.createIndex("name", "name", { unique: false })
             subscriptionStore.createIndex("nextPayment", "nextPayment", { unique: false })
           }
-  
-          if (!db.objectStoreNames.contains("labels")) {
-            db.createObjectStore("labels", { keyPath: "id" })
+
+          // Remove labels table if it exists (migration from v1 to v2)
+          if (db.objectStoreNames.contains("labels")) {
+            db.deleteObjectStore("labels")
           }
         }
       })
@@ -95,31 +96,29 @@ import type { Subscription, Label, CreateSubscriptionData, CreateLabelData } fro
       })
     }
   
-    async addLabel(label: CreateLabelData): Promise<Label> {
-      const newLabel: Label = {
-        ...label,
-        id: crypto.randomUUID(),
-        createdAt: new Date().toISOString(),
-      }
-  
-      const transaction = this.db!.transaction(["labels"], "readwrite")
-      const store = transaction.objectStore("labels")
-      await store.add(newLabel)
-  
-      return newLabel
-    }
-  
-    async getAllLabels(): Promise<Label[]> {
-      const transaction = this.db!.transaction(["labels"], "readonly")
-      const store = transaction.objectStore("labels")
-      const request = store.getAll()
-  
-      return new Promise((resolve, reject) => {
-        request.onsuccess = () => resolve(request.result)
-        request.onerror = () => reject(request.error)
-      })
-    }
+      async getAllUniqueLabels(): Promise<string[]> {
+    const subscriptions = await this.getAllSubscriptions()
+    const allLabels = subscriptions.flatMap(sub => sub.labels || [])
+    const uniqueLabels = [...new Set(allLabels)]
+    return uniqueLabels.sort()
+  }
   }
   
   export const db = new SubscriptionDB()
+
+  // Migration function to ensure all subscriptions have labels array
+  export async function migrateSubscriptionsLabels() {
+    await db.init()
+    const subscriptions = await db.getAllSubscriptions()
+    
+    let needsUpdate = false
+    for (const subscription of subscriptions) {
+      if (!Array.isArray(subscription.labels)) {
+        await db.updateSubscription(subscription.id, { labels: [] })
+        needsUpdate = true
+      }
+    }
+    
+    return needsUpdate
+  }
   

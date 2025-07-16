@@ -59,16 +59,16 @@ export function DashboardStats({ subscriptions, filteredSubscriptions }: Dashboa
   const thisMonthPayments = monthlyTotal
 
   return (
-    <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+    <div className="grid gap-3 grid-cols-1">
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1">
+          <CardTitle className="text-xs font-medium">
             {filteredSubscriptions.length > 0 ? "Filtered" : "Total"} Subscriptions
           </CardTitle>
-          <CreditCard className="h-4 w-4 text-neutral-500 dark:text-neutral-400" />
+          <CreditCard className="h-3 w-3 text-neutral-500 dark:text-neutral-400" />
         </CardHeader>
-        <CardContent>
-          <div className="text-4xl font-bold">{totalSubscriptions.toLocaleString('en-US')}</div>
+        <CardContent className="pb-2">
+          <div className="text-2xl font-bold">{totalSubscriptions.toLocaleString('en-US')}</div>
           <p className="text-xs text-neutral-500 dark:text-neutral-400">
             {filteredSubscriptions.length > 0 ? "Matching filters" : "Active subscriptions"}
           </p>
@@ -76,12 +76,12 @@ export function DashboardStats({ subscriptions, filteredSubscriptions }: Dashboa
       </Card>
 
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">This Month</CardTitle>
-          <Calendar className="h-4 w-4 text-neutral-500 dark:text-neutral-400" />
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1">
+          <CardTitle className="text-xs font-medium">This Month</CardTitle>
+          <Calendar className="h-3 w-3 text-neutral-500 dark:text-neutral-400" />
         </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">{formatCurrency(thisMonthPayments, "SAR")}</div>
+        <CardContent className="pb-2">
+          <div className="text-lg font-bold">{formatCurrency(thisMonthPayments, "SAR")}</div>
           <p className="text-xs text-neutral-500 dark:text-neutral-400">
             {filteredSubscriptions.length > 0 ? "Filtered payments due" : "Total payments due this month"}
           </p>
@@ -92,12 +92,12 @@ export function DashboardStats({ subscriptions, filteredSubscriptions }: Dashboa
       </Card>
 
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Yearly Total</CardTitle>
-          <TrendingUp className="h-4 w-4 text-neutral-500 dark:text-neutral-400" />
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1">
+          <CardTitle className="text-xs font-medium">Yearly Total</CardTitle>
+          <TrendingUp className="h-3 w-3 text-neutral-500 dark:text-neutral-400" />
         </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">{formatCurrency(yearlyTotal, "SAR")}</div>
+        <CardContent className="pb-2">
+          <div className="text-lg font-bold">{formatCurrency(yearlyTotal, "SAR")}</div>
           <p className="text-xs text-neutral-500 dark:text-neutral-400">
             {filteredSubscriptions.length > 0 ? "Filtered annual cost" : "Annual subscription cost"}
           </p>
