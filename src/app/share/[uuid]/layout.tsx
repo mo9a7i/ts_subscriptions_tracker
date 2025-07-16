@@ -3,10 +3,11 @@ import { getSharedSubscriptions, getSharedWorkspaceName } from "@/lib/workspace-
 import type { Subscription } from "@/types";
 
 // Generate dynamic metadata for SEO
-export async function generateMetadata({ params }: { params: { uuid: string } }): Promise<Metadata> {
+export async function generateMetadata({ params }: { params: Promise<{ uuid: string }> }): Promise<Metadata> {
+  const { uuid } = await params;
   try {
-    const workspaceName = await getSharedWorkspaceName(params.uuid);
-    const subscriptions = await getSharedSubscriptions(params.uuid);
+    const workspaceName = await getSharedWorkspaceName(uuid);
+    const subscriptions = await getSharedSubscriptions(uuid);
     
     if (!workspaceName || !subscriptions) {
       return {
@@ -35,7 +36,7 @@ export async function generateMetadata({ params }: { params: { uuid: string } })
         description,
         images: ["/screenshots/dark_image.png"],
         type: "website",
-        url: `https://mo9a7i.github.io/ts_subscriptions_tracker/share/${params.uuid}`,
+        url: `https://subtracker.mo9a7i.com/share/${uuid}`,
       },
       twitter: {
         card: "summary_large_image",

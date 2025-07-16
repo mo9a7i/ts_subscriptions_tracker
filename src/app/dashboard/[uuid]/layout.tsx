@@ -3,9 +3,10 @@ import { createWorkspaceDB } from "@/lib/workspace-db";
 import type { Subscription } from "@/types";
 
 // Generate dynamic metadata for SEO
-export async function generateMetadata({ params }: { params: { uuid: string } }): Promise<Metadata> {
+export async function generateMetadata({ params }: { params: Promise<{ uuid: string }> }): Promise<Metadata> {
+  const { uuid } = await params;
   try {
-    const workspaceDB = await createWorkspaceDB(params.uuid);
+    const workspaceDB = await createWorkspaceDB(uuid);
     const workspaceName = await workspaceDB.getWorkspaceName();
     const subscriptions = await workspaceDB.getAllSubscriptions();
     
@@ -28,7 +29,7 @@ export async function generateMetadata({ params }: { params: { uuid: string } })
         description,
         images: ["/screenshots/dark_image.png"],
         type: "website",
-        url: `https://subtracker.mo9a7i.com/dashboard/${params.uuid}`,
+        url: `https://subtracker.mo9a7i.com/dashboard/${uuid}`,
       },
       twitter: {
         card: "summary_large_image",
