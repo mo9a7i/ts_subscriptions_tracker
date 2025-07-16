@@ -25,8 +25,21 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-# Copy environment file for build-time variables
-COPY .env .env
+# Accept build arguments for environment variables
+ARG NEXT_PUBLIC_SUPABASE_URL
+ARG NEXT_PUBLIC_SUPABASE_ANON_KEY
+ARG NEXT_PUBLIC_STACK_API_URL
+ARG NEXT_PUBLIC_STACK_PROJECT_ID
+ARG NEXT_PUBLIC_STACK_PUBLISHABLE_CLIENT_KEY
+ARG STACK_SECRET_SERVER_KEY
+
+# Set environment variables from build args
+ENV NEXT_PUBLIC_SUPABASE_URL=$NEXT_PUBLIC_SUPABASE_URL
+ENV NEXT_PUBLIC_SUPABASE_ANON_KEY=$NEXT_PUBLIC_SUPABASE_ANON_KEY
+ENV NEXT_PUBLIC_STACK_API_URL=$NEXT_PUBLIC_STACK_API_URL
+ENV NEXT_PUBLIC_STACK_PROJECT_ID=$NEXT_PUBLIC_STACK_PROJECT_ID
+ENV NEXT_PUBLIC_STACK_PUBLISHABLE_CLIENT_KEY=$NEXT_PUBLIC_STACK_PUBLISHABLE_CLIENT_KEY
+ENV STACK_SECRET_SERVER_KEY=$STACK_SECRET_SERVER_KEY
 
 # Next.js collects completely anonymous telemetry data about general usage.
 # Learn more here: https://nextjs.org/telemetry
@@ -58,6 +71,10 @@ RUN chown nextjs:nodejs .next
 # https://nextjs.org/docs/advanced-features/output-file-tracing
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+
+# Set runtime environment variables for server-side usage
+ARG STACK_SECRET_SERVER_KEY
+ENV STACK_SECRET_SERVER_KEY=$STACK_SECRET_SERVER_KEY
 
 USER nextjs
 
