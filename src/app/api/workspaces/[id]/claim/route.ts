@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { hexclaveServerApp } from '@/stack/server'
+import { getHexclaveServerApp } from '@/stack/server'
 import { claimWorkspace } from '@/lib/workspace-repository'
 
 export async function POST(
@@ -7,7 +7,7 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const user = await hexclaveServerApp.getUser()
+    const user = await getHexclaveServerApp().getUser()
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }

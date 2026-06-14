@@ -3,6 +3,14 @@ import 'server-only'
 import { HexclaveServerApp } from '@hexclave/next'
 import { hexclaveClientApp } from './client'
 
-export const hexclaveServerApp = new HexclaveServerApp({
-  inheritsFrom: hexclaveClientApp,
-})
+let hexclaveServerAppInstance: HexclaveServerApp | null = null
+
+export function getHexclaveServerApp(): HexclaveServerApp {
+  if (!hexclaveServerAppInstance) {
+    hexclaveServerAppInstance = new HexclaveServerApp({
+      inheritsFrom: hexclaveClientApp,
+    })
+  }
+
+  return hexclaveServerAppInstance
+}

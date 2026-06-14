@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "db:migrate": "node --env-file=.env scripts/migrate.mjs"
+    "db:migrate": "node --env-file=.env scripts/migrate.mjs",
+    "db:import-backup": "node --env-file=.env scripts/import-supabase-backup.mjs"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1068.0",
