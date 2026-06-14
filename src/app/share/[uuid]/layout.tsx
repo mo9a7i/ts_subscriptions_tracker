@@ -1,5 +1,8 @@
 import type { Metadata } from "next";
-import { getSharedSubscriptions, getSharedWorkspaceName } from "@/lib/workspace-db";
+import {
+  getSharedSubscriptions,
+  getSharedWorkspaceName,
+} from "@/lib/workspace-repository";
 import type { Subscription } from "@/types";
 
 // Generate dynamic metadata for SEO

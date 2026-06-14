@@ -4,12 +4,9 @@ services:
       context: .
       dockerfile: Dockerfile
       args:
-        - NEXT_PUBLIC_SUPABASE_URL=${NEXT_PUBLIC_SUPABASE_URL}
-        - NEXT_PUBLIC_SUPABASE_ANON_KEY=${NEXT_PUBLIC_SUPABASE_ANON_KEY}
-        - NEXT_PUBLIC_STACK_API_URL=${NEXT_PUBLIC_STACK_API_URL}
-        - NEXT_PUBLIC_STACK_PROJECT_ID=${NEXT_PUBLIC_STACK_PROJECT_ID}
-        - NEXT_PUBLIC_STACK_PUBLISHABLE_CLIENT_KEY=${NEXT_PUBLIC_STACK_PUBLISHABLE_CLIENT_KEY}
-        - STACK_SECRET_SERVER_KEY=${STACK_SECRET_SERVER_KEY}
+        - NEXT_PUBLIC_HEXCLAVE_API_URL=${NEXT_PUBLIC_HEXCLAVE_API_URL}
+        - NEXT_PUBLIC_HEXCLAVE_PROJECT_ID=${NEXT_PUBLIC_HEXCLAVE_PROJECT_ID}
+        - NEXT_PUBLIC_HEXCLAVE_PUBLISHABLE_CLIENT_KEY=${NEXT_PUBLIC_HEXCLAVE_PUBLISHABLE_CLIENT_KEY}
     container_name: subtracker-app
     ports:
       - "8085:3000"
@@ -25,16 +22,3 @@ services:
       timeout: 10s
       retries: 3
       start_period: 40s
-
-  # Optional: Add a reverse proxy for production
-  # nginx:
-  #   image: nginx:alpine
-  #   container_name: subtracker-nginx
-  #   ports:
-  #     - "80:80"
-  #     - "443:443"
-  #   volumes:
-  #     - ./nginx.conf:/etc/nginx/nginx.conf
-  #   depends_on:
-  #     - subtracker
-  #   restart: unless-stopped 

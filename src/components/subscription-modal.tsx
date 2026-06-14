@@ -120,20 +120,28 @@ export function SubscriptionModal({ subscription, onSave, trigger, workspaceDB, 
     const handleIconUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
         if (file) {
-            const reader = new FileReader();
-            reader.onload = async (e: ProgressEvent<FileReader>) => {
-                const imageDataUrl = e.target?.result as string;
-                setFormData((prev) => ({ ...prev, icon: imageDataUrl }));
+            try {
+                const uploadData = new FormData();
+                uploadData.append("file", file);
+                const response = await fetch("/api/icons/upload", {
+                    method: "POST",
+                    body: uploadData,
+                });
+                if (!response.ok) {
+                    throw new Error("Upload failed");
+                }
+                const { url } = await response.json();
+                setFormData((prev) => ({ ...prev, icon: url }));
 
-                // Extract colors from the uploaded image
                 try {
-                    const colors = await extractColorsFromImage(imageDataUrl, formData.name);
+                    const colors = await extractColorsFromImage(url, formData.name);
                     setFormData((prev) => ({ ...prev, colors }));
                 } catch (error) {
                     console.error("Failed to extract colors from image:", error);
                 }
-            };
-            reader.readAsDataURL(file);
+            } catch (error) {
+                console.error("Failed to upload icon:", error);
+            }
         }
     };
 

@@ -1,14 +1,16 @@
 import type { Metadata } from "next";
-import { createWorkspaceDB } from "@/lib/workspace-db";
+import {
+  getWorkspaceName,
+  getSubscriptions,
+} from "@/lib/workspace-repository";
 import type { Subscription } from "@/types";
 
 // Generate dynamic metadata for SEO
 export async function generateMetadata({ params }: { params: Promise<{ uuid: string }> }): Promise<Metadata> {
   const { uuid } = await params;
   try {
-    const workspaceDB = await createWorkspaceDB(uuid);
-    const workspaceName = await workspaceDB.getWorkspaceName();
-    const subscriptions = await workspaceDB.getAllSubscriptions();
+    const workspaceName = await getWorkspaceName(uuid);
+    const subscriptions = await getSubscriptions(uuid);
     
     const subscriptionCount = subscriptions.length;
     const totalMonthlyCost = subscriptions.reduce((sum: number, sub: Subscription) => {

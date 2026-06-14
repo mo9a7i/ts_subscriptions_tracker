@@ -1,4 +1,6 @@
 import { ThemeProvider } from "@/components/theme-provider";
+import { AuthProvider } from "@/components/auth-provider";
+import { Suspense } from "react";
 
 import type { Metadata } from "next";
 import { Inter } from "next/font/google"
@@ -61,7 +63,9 @@ export default function RootLayout({
         <html lang="en" suppressHydrationWarning>
             <body className={`${inter.className} antialiased`}>
                 <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
-                    {children}
+                    <Suspense fallback={null}>
+                        <AuthProvider>{children}</AuthProvider>
+                    </Suspense>
                 </ThemeProvider>
             </body>
         </html>

@@ -12,27 +12,51 @@ spec:
     name: subtracker-secret
     creationPolicy: Owner
   data:
-    - secretKey: NEXT_PUBLIC_SUPABASE_URL
+    - secretKey: DATABASE_URL
       remoteRef:
         key: mfo/private/subtracker/secrets
-        property: NEXT_PUBLIC_SUPABASE_URL
-    - secretKey: NEXT_PUBLIC_SUPABASE_ANON_KEY
+        property: DATABASE_URL
+    - secretKey: S3_ENDPOINT
       remoteRef:
         key: mfo/private/subtracker/secrets
-        property: NEXT_PUBLIC_SUPABASE_ANON_KEY
-    - secretKey: NEXT_PUBLIC_STACK_API_URL
+        property: S3_ENDPOINT
+    - secretKey: S3_BUCKET
       remoteRef:
         key: mfo/private/subtracker/secrets
-        property: NEXT_PUBLIC_STACK_API_URL
-    - secretKey: NEXT_PUBLIC_STACK_PROJECT_ID
+        property: S3_BUCKET
+    - secretKey: S3_ACCESS_KEY_ID
       remoteRef:
         key: mfo/private/subtracker/secrets
-        property: NEXT_PUBLIC_STACK_PROJECT_ID
-    - secretKey: NEXT_PUBLIC_STACK_PUBLISHABLE_CLIENT_KEY
+        property: S3_ACCESS_KEY_ID
+    - secretKey: S3_SECRET_ACCESS_KEY
       remoteRef:
         key: mfo/private/subtracker/secrets
-        property: NEXT_PUBLIC_STACK_PUBLISHABLE_CLIENT_KEY
-    - secretKey: STACK_SECRET_SERVER_KEY
+        property: S3_SECRET_ACCESS_KEY
+    - secretKey: S3_REGION
       remoteRef:
         key: mfo/private/subtracker/secrets
-        property: STACK_SECRET_SERVER_KEY
+        property: S3_REGION
+    - secretKey: S3_PUBLIC_URL_BASE
+      remoteRef:
+        key: mfo/private/subtracker/secrets
+        property: S3_PUBLIC_URL_BASE
+    - secretKey: NEXT_PUBLIC_HEXCLAVE_API_URL
+      remoteRef:
+        key: mfo/private/subtracker/secrets
+        property: NEXT_PUBLIC_HEXCLAVE_API_URL
+    - secretKey: HEXCLAVE_API_URL_SERVER
+      remoteRef:
+        key: mfo/private/subtracker/secrets
+        property: HEXCLAVE_API_URL_SERVER
+    - secretKey: NEXT_PUBLIC_HEXCLAVE_PROJECT_ID
+      remoteRef:
+        key: mfo/private/subtracker/secrets
+        property: NEXT_PUBLIC_HEXCLAVE_PROJECT_ID
+    - secretKey: NEXT_PUBLIC_HEXCLAVE_PUBLISHABLE_CLIENT_KEY
+      remoteRef:
+        key: mfo/private/subtracker/secrets
+        property: NEXT_PUBLIC_HEXCLAVE_PUBLISHABLE_CLIENT_KEY
+    - secretKey: HEXCLAVE_SECRET_SERVER_KEY
+      remoteRef:
+        key: mfo/private/subtracker/secrets
+        property: HEXCLAVE_SECRET_SERVER_KEY
