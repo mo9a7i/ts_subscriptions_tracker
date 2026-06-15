@@ -144,22 +144,32 @@ export class WorkspaceDatabase {
     return result.sharingUuid
   }
 
-  async getWorkspaceName(): Promise<string> {
+  async getWorkspaceInfo(): Promise<{ name: string; isAnonymous: boolean } | null> {
     try {
-      const result = await apiFetch<{ name: string }>(`${this.baseUrl}`)
-      return result.name
+      const result = await apiFetch<{
+        exists: boolean
+        name?: string
+        isAnonymous?: boolean
+      }>(`${this.baseUrl}`)
+
+      if (!result.exists) return null
+
+      return {
+        name: result.name ?? 'My Subscriptions',
+        isAnonymous: result.isAnonymous ?? true,
+      }
     } catch {
-      return 'My Subscriptions'
+      return null
     }
   }
 
-  async claimWorkspace(): Promise<boolean> {
-    try {
-      await apiFetch(`${this.baseUrl}/claim`, { method: 'POST' })
-      return true
-    } catch {
-      return false
-    }
+  async getWorkspaceName(): Promise<string> {
+    const info = await this.getWorkspaceInfo()
+    return info?.name ?? 'My Subscriptions'
+  }
+
+  async claimWorkspace(): Promise<void> {
+    await apiFetch(`${this.baseUrl}/claim`, { method: 'POST' })
   }
 }
 

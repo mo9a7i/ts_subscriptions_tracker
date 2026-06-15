@@ -70,12 +70,35 @@ export async function initializeWorkspace(workspaceId: string, name?: string): P
   )
 }
 
-export async function getWorkspaceName(workspaceId: string): Promise<string> {
-  const result = await query<{ name: string }>(
-    'SELECT name FROM workspaces WHERE id = $1',
+export interface WorkspaceInfo {
+  name: string
+  isAnonymous: boolean
+  userId: string | null
+}
+
+export async function getWorkspaceInfo(workspaceId: string): Promise<WorkspaceInfo | null> {
+  const result = await query<{
+    name: string
+    is_anonymous: boolean
+    user_id: string | null
+  }>(
+    'SELECT name, is_anonymous, user_id FROM workspaces WHERE id = $1',
     [workspaceId]
   )
-  return result.rows[0]?.name ?? 'My Subscriptions'
+
+  const row = result.rows[0]
+  if (!row) return null
+
+  return {
+    name: row.name,
+    isAnonymous: row.is_anonymous,
+    userId: row.user_id,
+  }
+}
+
+export async function getWorkspaceName(workspaceId: string): Promise<string> {
+  const info = await getWorkspaceInfo(workspaceId)
+  return info?.name ?? 'My Subscriptions'
 }
 
 export async function getSharingUuid(workspaceId: string): Promise<string | null> {

@@ -7,6 +7,7 @@ import { ExportDropdown } from "@/components/export-dropdown";
 import { Shield, UserPlus, X } from "lucide-react";
 import { useHexclaveApp, useUser } from "@/stack/hooks";
 import type { Subscription } from "@/types";
+import { WorkspaceStorage } from "@/lib/workspace-storage";
 import type { WorkspaceDatabase } from "@/lib/workspace-db";
 
 interface SecurityAlertProps {
@@ -15,6 +16,7 @@ interface SecurityAlertProps {
   selectedLabels: string[];
   onImportComplete: () => void;
   workspaceDB: WorkspaceDatabase;
+  workspaceId: string;
   onDismiss: () => void;
 }
 
@@ -24,23 +26,32 @@ export function SecurityAlert({
   selectedLabels, 
   onImportComplete, 
   workspaceDB,
+  workspaceId,
   onDismiss 
 }: SecurityAlertProps) {
   const app = useHexclaveApp();
   const user = useUser();
   const [isClaiming, setIsClaiming] = useState(false);
+  const [claimError, setClaimError] = useState<string | null>(null);
 
   const handleSignUp = () => {
     app.redirectToSignUp();
   };
 
+  const handleDismiss = () => {
+    WorkspaceStorage.dismissSecurityAlert(workspaceId);
+    onDismiss();
+  };
+
   const handleClaimWorkspace = async () => {
     setIsClaiming(true);
+    setClaimError(null);
     try {
       await workspaceDB.claimWorkspace();
       onDismiss();
     } catch (error) {
       console.error("Failed to claim workspace:", error);
+      setClaimError(error instanceof Error ? error.message : "Failed to claim workspace");
     } finally {
       setIsClaiming(false);
     }
@@ -54,6 +65,9 @@ export function SecurityAlert({
           <div className="text-amber-800 dark:text-amber-200">
             <strong>Security Notice:</strong> This workspace is anonymous and editable by anyone with this link. 
             {user ? " Claim it to link it to your account." : " Export your data for backup or sign up to protect it."}
+            {claimError && (
+              <p className="mt-1 text-sm text-red-600 dark:text-red-400">{claimError}</p>
+            )}
           </div>
         </div>
         <div className="flex items-center gap-2 flex-shrink-0">
@@ -91,7 +105,7 @@ export function SecurityAlert({
           <Button
             variant="ghost"
             size="sm"
-            onClick={onDismiss}
+            onClick={handleDismiss}
             className="text-amber-600 hover:text-amber-800 dark:text-amber-400 dark:hover:text-amber-200"
           >
             <X className="w-4 h-4" />

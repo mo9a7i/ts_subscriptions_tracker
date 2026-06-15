@@ -34,7 +34,7 @@ export default function WorkspaceDashboard() {
     const [error, setError] = useState<string | null>(null);
     const [sortBy, setSortBy] = useState<SortOption>("nextPayment-asc");
     const [workspaceDB, setWorkspaceDB] = useState<ReturnType<typeof createWorkspaceDB> | null>(null);
-    const [showSecurityAlert, setShowSecurityAlert] = useState(true);
+    const [showSecurityAlert, setShowSecurityAlert] = useState(false);
     const [showNameModal, setShowNameModal] = useState(false);
     const [isCreatingWorkspace, setIsCreatingWorkspace] = useState(false);
 
@@ -89,9 +89,18 @@ export default function WorkspaceDashboard() {
         }
     };
 
+    const updateSecurityAlertVisibility = async (db: ReturnType<typeof createWorkspaceDB>) => {
+        const info = await db.getWorkspaceInfo();
+        if (!info) return;
+
+        const dismissed = WorkspaceStorage.isSecurityAlertDismissed(workspaceId);
+        setShowSecurityAlert(info.isAnonymous && !dismissed);
+    };
+
     const initializeExistingWorkspace = async (db: ReturnType<typeof createWorkspaceDB>) => {
         try {
             await db.initializeWorkspace();
+            await updateSecurityAlertVisibility(db);
             await loadSubscriptions(db);
         } catch (error) {
             console.error("Failed to initialize workspace:", error);
@@ -108,6 +117,7 @@ export default function WorkspaceDashboard() {
         
         try {
             await workspaceDB.initializeWorkspace(name);
+            await updateSecurityAlertVisibility(workspaceDB);
             await loadSubscriptions(workspaceDB);
             setShowNameModal(false);
         } catch (error) {
@@ -210,6 +220,7 @@ export default function WorkspaceDashboard() {
                             selectedLabels={selectedLabels}
                             onImportComplete={handleSubscriptionSave}
                             workspaceDB={workspaceDB}
+                            workspaceId={workspaceId}
                             onDismiss={() => setShowSecurityAlert(false)}
                         />
                     </div>

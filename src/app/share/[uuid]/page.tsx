@@ -5,6 +5,7 @@ import { useParams } from "next/navigation";
 import { getSharedSubscriptions, getSharedWorkspaceName } from "@/lib/workspace-db";
 import { SubscriptionList } from "@/components/subscription-lister";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { AuthControls } from "@/components/auth-controls";
 import { Button } from "@/components/ui/button";
 import { LoadingSpinner } from "@/components/common";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -153,6 +154,7 @@ export default function ShareWorkspace() {
                         </p>
                     </div>
                     <div className="flex items-center justify-end gap-4">
+                        <AuthControls />
                         <ThemeToggle />
                     </div>
                 </header>

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { SubscriptionModal } from "@/components/subscription-modal";
 import { ShareModal } from "@/components/share-modal";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { AuthControls } from "@/components/auth-controls";
 import { Button } from "@/components/ui/button";
 import { Share } from "lucide-react";
 import Link from "next/link";
@@ -37,6 +38,7 @@ export default function DashboardHeader({ onSubscriptionSave, workspaceDB, works
                         Share
                     </Button>
                     <SubscriptionModal onSave={onSubscriptionSave} workspaceDB={workspaceDB} />
+                    <AuthControls />
                     <ThemeToggle />
                 </div>
             </header>

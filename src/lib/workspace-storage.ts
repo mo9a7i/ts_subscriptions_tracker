@@ -8,6 +8,7 @@ export class WorkspaceStorage {
   private static LAST_WORKSPACE_KEY = 'lastWorkspaceId'
   private static CACHE_PREFIX = 'workspace_cache_'
   private static SORTING_PREFIX = 'sorting_pref_'
+  private static SECURITY_ALERT_PREFIX = 'security_alert_dismissed_'
   private static CACHE_DURATION = 5 * 60 * 1000 // 5 minutes
 
   // Remember last visited workspace
@@ -32,6 +33,19 @@ export class WorkspaceStorage {
         `${this.SORTING_PREFIX}${uuid}`,
         JSON.stringify(preferences)
       )
+    }
+  }
+
+  static isSecurityAlertDismissed(uuid: string): boolean {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem(`${this.SECURITY_ALERT_PREFIX}${uuid}`) === 'true'
+    }
+    return false
+  }
+
+  static dismissSecurityAlert(uuid: string): void {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(`${this.SECURITY_ALERT_PREFIX}${uuid}`, 'true')
     }
   }
 
