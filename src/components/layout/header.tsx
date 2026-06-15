@@ -1,7 +1,7 @@
 import Link from "next/link";
-import { Button } from "../ui/button";
 import { ThemeToggle } from "../theme-toggle";
 import { AuthControls } from "../auth-controls";
+import { NavLinks } from "../nav-links";
 import { CreditCard } from "lucide-react";
 
 export default function Header() {
@@ -13,9 +13,7 @@ export default function Header() {
             <span className="text-xl font-bold">SubTracker</span>
           </Link>
           <div className="flex items-center gap-4">
-            <Link href="/dashboard">
-              <Button variant="ghost">Dashboard</Button>
-            </Link>
+            <NavLinks />
             <AuthControls />
             <ThemeToggle />
           </div>

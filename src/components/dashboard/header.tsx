@@ -5,9 +5,9 @@ import { SubscriptionModal } from "@/components/subscription-modal";
 import { ShareModal } from "@/components/share-modal";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { AuthControls } from "@/components/auth-controls";
+import { NavLinks } from "@/components/nav-links";
 import { Button } from "@/components/ui/button";
 import { Share } from "lucide-react";
-import Link from "next/link";
 import type { WorkspaceDatabase } from "@/lib/workspace-db";
 
 interface DashboardHeaderProps {
@@ -28,7 +28,8 @@ export default function DashboardHeader({ onSubscriptionSave, workspaceDB, works
                         Manage and track your recurring subscriptions
                     </p>
                 </div>
-                <div className="flex items-center justify-end gap-4">
+                <div className="flex items-center justify-end gap-4 flex-wrap">
+                    <NavLinks />
                     <Button
                         variant="outline"
                         onClick={() => setIsShareModalOpen(true)}

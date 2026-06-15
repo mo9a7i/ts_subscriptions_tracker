@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { updateSubscription, deleteSubscription } from '@/lib/workspace-repository'
+import { resolveWorkspaceAccess } from '@/lib/workspace-access'
 import type { Subscription } from '@/types'
 
 export async function PATCH(
@@ -8,6 +9,9 @@ export async function PATCH(
 ) {
   try {
     const { id, subscriptionId } = await params
+    const { denial } = await resolveWorkspaceAccess(id)
+    if (denial) return denial
+
     const updates = (await request.json()) as Partial<Subscription>
     await updateSubscription(id, subscriptionId, updates)
     return NextResponse.json({ success: true })
@@ -23,6 +27,9 @@ export async function DELETE(
 ) {
   try {
     const { id, subscriptionId } = await params
+    const { denial } = await resolveWorkspaceAccess(id)
+    if (denial) return denial
+
     await deleteSubscription(id, subscriptionId)
     return NextResponse.json({ success: true })
   } catch (error) {

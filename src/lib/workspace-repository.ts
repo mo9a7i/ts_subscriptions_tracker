@@ -126,11 +126,75 @@ export async function generateSharingLink(workspaceId: string): Promise<string> 
 export async function claimWorkspace(workspaceId: string, userId: string): Promise<boolean> {
   const result = await query(
     `UPDATE workspaces
-     SET user_id = $1, is_anonymous = FALSE, updated_at = NOW()
+     SET user_id = $1, is_anonymous = FALSE, last_accessed_at = NOW(), updated_at = NOW()
      WHERE id = $2 AND (user_id IS NULL OR user_id = $1)`,
     [userId, workspaceId]
   )
   return (result.rowCount ?? 0) > 0
+}
+
+export interface UserWorkspaceSummary {
+  id: string
+  name: string
+  lastAccessedAt: string | null
+  updatedAt: string
+}
+
+export async function getWorkspacesByUserId(userId: string): Promise<UserWorkspaceSummary[]> {
+  const result = await query<{
+    id: string
+    name: string
+    last_accessed_at: Date | string | null
+    updated_at: Date | string
+  }>(
+    `SELECT id, name, last_accessed_at, updated_at
+     FROM workspaces
+     WHERE user_id = $1
+     ORDER BY last_accessed_at DESC NULLS LAST, updated_at DESC`,
+    [userId]
+  )
+
+  return result.rows.map((row) => ({
+    id: row.id,
+    name: row.name,
+    lastAccessedAt: row.last_accessed_at ? toIso(row.last_accessed_at) : null,
+    updatedAt: toIso(row.updated_at),
+  }))
+}
+
+export async function createOwnedWorkspace(
+  userId: string,
+  name?: string
+): Promise<UserWorkspaceSummary> {
+  const id = crypto.randomUUID()
+  const workspaceName = name?.trim() || 'My Subscriptions'
+
+  const result = await query<{
+    id: string
+    name: string
+    last_accessed_at: Date | string
+    updated_at: Date | string
+  }>(
+    `INSERT INTO workspaces (id, name, user_id, is_anonymous, last_accessed_at)
+     VALUES ($1, $2, $3, FALSE, NOW())
+     RETURNING id, name, last_accessed_at, updated_at`,
+    [id, workspaceName, userId]
+  )
+
+  const row = result.rows[0]
+  return {
+    id: row.id,
+    name: row.name,
+    lastAccessedAt: toIso(row.last_accessed_at),
+    updatedAt: toIso(row.updated_at),
+  }
+}
+
+export async function touchWorkspaceAccess(workspaceId: string, userId: string): Promise<void> {
+  await query(
+    `UPDATE workspaces SET last_accessed_at = NOW() WHERE id = $1 AND user_id = $2`,
+    [workspaceId, userId]
+  )
 }
 
 export async function getSubscriptions(workspaceId: string): Promise<Subscription[]> {

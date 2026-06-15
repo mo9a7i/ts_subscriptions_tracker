@@ -5,6 +5,7 @@ interface SortingPreferences {
 }
 
 export class WorkspaceStorage {
+  // Remember last visited anonymous workspace (signed-in users use the server)
   private static LAST_WORKSPACE_KEY = 'lastWorkspaceId'
   private static CACHE_PREFIX = 'workspace_cache_'
   private static SORTING_PREFIX = 'sorting_pref_'

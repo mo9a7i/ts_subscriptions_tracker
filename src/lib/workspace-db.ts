@@ -1,6 +1,15 @@
 import { WorkspaceStorage } from './workspace-storage'
 import type { Subscription, CreateSubscriptionData } from '@/types'
 
+export interface UserWorkspaceSummary {
+  id: string
+  name: string
+  lastAccessedAt: string | null
+  updatedAt: string
+}
+
+export type WorkspaceAccessStatus = 'ok' | 'not_found' | 'forbidden'
+
 async function apiFetch<T>(url: string, options?: RequestInit): Promise<T> {
   const response = await fetch(url, {
     ...options,
@@ -18,6 +27,33 @@ async function apiFetch<T>(url: string, options?: RequestInit): Promise<T> {
   return response.json() as Promise<T>
 }
 
+async function fetchWorkspaceAccessStatus(workspaceId: string): Promise<WorkspaceAccessStatus> {
+  const response = await fetch(`/api/workspaces/${workspaceId}`, {
+    headers: { 'Content-Type': 'application/json' },
+  })
+
+  if (response.status === 404) return 'not_found'
+  if (response.status === 403) return 'forbidden'
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({}))
+    throw new Error(body.error || `Request failed: ${response.status}`)
+  }
+
+  return 'ok'
+}
+
+export async function listMyWorkspaces(): Promise<UserWorkspaceSummary[]> {
+  const result = await apiFetch<{ workspaces: UserWorkspaceSummary[] }>('/api/workspaces/mine')
+  return result.workspaces
+}
+
+export async function createMyWorkspace(name: string): Promise<UserWorkspaceSummary> {
+  return apiFetch<UserWorkspaceSummary>('/api/workspaces/mine', {
+    method: 'POST',
+    body: JSON.stringify({ name }),
+  })
+}
+
 export class WorkspaceDatabase {
   constructor(private workspaceId: string) {}
 
@@ -31,11 +67,15 @@ export class WorkspaceDatabase {
   }
 
   async workspaceExists(): Promise<boolean> {
+    const status = await this.getAccessStatus()
+    return status === 'ok'
+  }
+
+  async getAccessStatus(): Promise<WorkspaceAccessStatus> {
     try {
-      const result = await apiFetch<{ exists: boolean }>(`${this.baseUrl}`)
-      return result.exists
+      return await fetchWorkspaceAccessStatus(this.workspaceId)
     } catch {
-      return false
+      return 'not_found'
     }
   }
 

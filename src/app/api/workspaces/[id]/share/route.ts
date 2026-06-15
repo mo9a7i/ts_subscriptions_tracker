@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { generateSharingLink, getSharingUuid } from '@/lib/workspace-repository'
+import { resolveWorkspaceAccess } from '@/lib/workspace-access'
 
 export async function GET(
   _request: Request,
@@ -7,6 +8,9 @@ export async function GET(
 ) {
   try {
     const { id } = await params
+    const { denial } = await resolveWorkspaceAccess(id)
+    if (denial) return denial
+
     const sharingUuid = await getSharingUuid(id)
     return NextResponse.json({ sharingUuid })
   } catch (error) {
@@ -21,6 +25,9 @@ export async function POST(
 ) {
   try {
     const { id } = await params
+    const { denial } = await resolveWorkspaceAccess(id)
+    if (denial) return denial
+
     const sharingUuid = await generateSharingLink(id)
     return NextResponse.json({ sharingUuid })
   } catch (error) {

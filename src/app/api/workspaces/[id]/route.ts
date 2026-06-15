@@ -2,8 +2,8 @@ import { NextResponse } from 'next/server'
 import {
   workspaceExists,
   initializeWorkspace,
-  getWorkspaceInfo,
 } from '@/lib/workspace-repository'
+import { resolveWorkspaceAccess } from '@/lib/workspace-access'
 
 export async function GET(
   _request: Request,
@@ -11,12 +11,9 @@ export async function GET(
 ) {
   try {
     const { id } = await params
-    const exists = await workspaceExists(id)
-    if (!exists) {
-      return NextResponse.json({ exists: false }, { status: 404 })
-    }
+    const { info, denial } = await resolveWorkspaceAccess(id)
+    if (denial) return denial
 
-    const info = await getWorkspaceInfo(id)
     return NextResponse.json({
       exists: true,
       name: info!.name,
@@ -34,11 +31,25 @@ export async function POST(
 ) {
   try {
     const { id } = await params
+    const exists = await workspaceExists(id)
+
+    if (exists) {
+      const { info, denial } = await resolveWorkspaceAccess(id)
+      if (denial) return denial
+
+      return NextResponse.json({
+        exists: true,
+        name: info!.name,
+        isAnonymous: info!.isAnonymous,
+      })
+    }
+
     const body = await request.json().catch(() => ({}))
     const name = typeof body.name === 'string' ? body.name : undefined
 
     await initializeWorkspace(id, name)
-    const info = await getWorkspaceInfo(id)
+    const { info, denial } = await resolveWorkspaceAccess(id)
+    if (denial) return denial
 
     return NextResponse.json({
       exists: true,

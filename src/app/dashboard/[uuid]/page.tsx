@@ -4,9 +4,10 @@ import { useState, useEffect } from "react";
 
 // This page uses dynamic routing and should not be statically generated
 export const dynamic = 'force-dynamic';
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { createWorkspaceDB } from "@/lib/workspace-db";
 import { WorkspaceStorage } from "@/lib/workspace-storage";
+import { useUser } from "@/stack/hooks";
 import { SubscriptionList } from "@/components/subscription-lister";
 import { Sidebar } from "@/components/sidebar";
 import { ExportDropdown } from "@/components/export-dropdown";
@@ -27,6 +28,8 @@ function isValidUUID(uuid: string): boolean {
 
 export default function WorkspaceDashboard() {
     const params = useParams();
+    const router = useRouter();
+    const user = useUser();
     const workspaceId = params.uuid as string;
     const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
     const [selectedLabels, setSelectedLabels] = useState<string[]>([]);
@@ -39,6 +42,8 @@ export default function WorkspaceDashboard() {
     const [isCreatingWorkspace, setIsCreatingWorkspace] = useState(false);
 
     useEffect(() => {
+        if (user === undefined) return;
+
         // Validate UUID
         if (!isValidUUID(workspaceId)) {
             setError("Invalid workspace ID");
@@ -46,8 +51,10 @@ export default function WorkspaceDashboard() {
             return;
         }
 
-        // Remember this workspace
-        WorkspaceStorage.setLastWorkspace(workspaceId);
+        // Anonymous sessions only: remember last visited workspace in localStorage
+        if (!user) {
+            WorkspaceStorage.setLastWorkspace(workspaceId);
+        }
 
         // Load saved sorting preferences
         const savedSorting = WorkspaceStorage.getSortingPreferences(workspaceId);
@@ -60,7 +67,7 @@ export default function WorkspaceDashboard() {
         setWorkspaceDB(db);
         
         checkAndInitializeWorkspace(db);
-    }, [workspaceId]);
+    }, [workspaceId, user]);
 
     // Save sorting preferences whenever they change
     useEffect(() => {
@@ -71,17 +78,24 @@ export default function WorkspaceDashboard() {
 
     const checkAndInitializeWorkspace = async (db: ReturnType<typeof createWorkspaceDB>) => {
         try {
-            // Check if workspace exists
-            const exists = await db.workspaceExists();
-            
-            if (!exists) {
-                // New workspace - show naming modal
+            const access = await db.getAccessStatus();
+
+            if (access === 'forbidden') {
+                router.replace('/workspaces');
+                return;
+            }
+
+            if (access === 'not_found') {
+                if (user) {
+                    router.replace('/workspaces?new=1');
+                    return;
+                }
                 setShowNameModal(true);
                 setIsLoading(false);
-            } else {
-                // Existing workspace - proceed normally
-                await initializeExistingWorkspace(db);
+                return;
             }
+
+            await initializeExistingWorkspace(db);
         } catch (error) {
             console.error("Failed to check workspace:", error);
             setError("Failed to load workspace. Please try again.");
@@ -163,6 +177,14 @@ export default function WorkspaceDashboard() {
     const filteredSubscriptions = selectedLabels.length > 0 
         ? subscriptions.filter((sub) => sub.labels.some((label) => selectedLabels.includes(label))) 
         : [];
+
+    if (isLoading && !showNameModal && user === undefined) {
+        return (
+            <div className="min-h-screen bg-background flex items-center justify-center">
+                <LoadingSpinner text="Loading your workspace..." />
+            </div>
+        );
+    }
 
     if (isLoading && !showNameModal) {
         return (

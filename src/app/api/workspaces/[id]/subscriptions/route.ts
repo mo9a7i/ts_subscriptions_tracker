@@ -3,6 +3,7 @@ import {
   getSubscriptions,
   addSubscription,
 } from '@/lib/workspace-repository'
+import { resolveWorkspaceAccess } from '@/lib/workspace-access'
 import type { CreateSubscriptionData } from '@/types'
 
 export async function GET(
@@ -11,6 +12,9 @@ export async function GET(
 ) {
   try {
     const { id } = await params
+    const { denial } = await resolveWorkspaceAccess(id)
+    if (denial) return denial
+
     const subscriptions = await getSubscriptions(id)
     return NextResponse.json(subscriptions)
   } catch (error) {
@@ -25,6 +29,9 @@ export async function POST(
 ) {
   try {
     const { id } = await params
+    const { denial } = await resolveWorkspaceAccess(id)
+    if (denial) return denial
+
     const body = (await request.json()) as CreateSubscriptionData
     const subscription = await addSubscription(id, body)
     return NextResponse.json(subscription, { status: 201 })

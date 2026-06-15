@@ -1,36 +1,52 @@
 'use client'
 
 import { useEffect } from 'react'
-
-// This page generates UUIDs dynamically and should not be statically generated
-export const dynamic = 'force-dynamic'
 import { useRouter } from 'next/navigation'
+import { useUser } from '@/stack/hooks'
 import { WorkspaceStorage } from '@/lib/workspace-storage'
+import { listMyWorkspaces } from '@/lib/workspace-db'
+import { LoadingSpinner } from '@/components/common'
+
+export const dynamic = 'force-dynamic'
 
 export default function DashboardRedirect() {
   const router = useRouter()
+  const user = useUser()
 
   useEffect(() => {
-    // Check if user has a previous workspace
-    const lastWorkspace = WorkspaceStorage.getLastWorkspace()
-    
-    if (lastWorkspace) {
-      // Redirect to their last workspace
-      router.push(`/dashboard/${lastWorkspace}`)
-    } else {
-      // Generate new workspace UUID
-      const newUUID = crypto.randomUUID()
-      WorkspaceStorage.setLastWorkspace(newUUID)
-      router.push(`/dashboard/${newUUID}`)
+    if (user === undefined) return
+
+    async function redirect() {
+      if (user) {
+        try {
+          const workspaces = await listMyWorkspaces()
+          if (workspaces.length > 0) {
+            router.replace(`/dashboard/${workspaces[0].id}`)
+          } else {
+            router.replace('/workspaces?new=1')
+          }
+        } catch {
+          router.replace('/workspaces')
+        }
+        return
+      }
+
+      const lastWorkspace = WorkspaceStorage.getLastWorkspace()
+      if (lastWorkspace) {
+        router.replace(`/dashboard/${lastWorkspace}`)
+      } else {
+        const newUUID = crypto.randomUUID()
+        WorkspaceStorage.setLastWorkspace(newUUID)
+        router.replace(`/dashboard/${newUUID}`)
+      }
     }
-  }, [router])
+
+    redirect()
+  }, [router, user])
 
   return (
     <div className="flex items-center justify-center min-h-screen">
-      <div className="text-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-        <p className="text-muted-foreground">Setting up your workspace...</p>
-      </div>
+      <LoadingSpinner text="Setting up your workspace..." />
     </div>
   )
 }
