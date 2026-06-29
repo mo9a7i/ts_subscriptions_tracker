@@ -1,10 +1,11 @@
-import { readFileSync, existsSync } from 'fs'
+import { readFileSync, existsSync, readdirSync } from 'fs'
 import { dirname, join } from 'path'
 import { fileURLToPath } from 'url'
 import pg from 'pg'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const projectRoot = join(__dirname, '..')
+const migrationsDir = join(projectRoot, 'migrations')
 
 function loadEnvFile(filename) {
   const path = join(projectRoot, filename)
@@ -33,7 +34,6 @@ function loadEnvFile(filename) {
   }
 }
 
-// Load .env first, then allow .env.local overrides (matches Next.js precedence)
 loadEnvFile('.env')
 loadEnvFile('.env.local')
 
@@ -53,12 +53,26 @@ const connectionString = getConnectionString()
 const hostForLog = connectionString.match(/@([^/]+)\//)?.[1] ?? 'unknown'
 console.log(`Connecting to Postgres at ${hostForLog}`)
 
-const sql = readFileSync(join(projectRoot, 'migrations/001_initial.sql'), 'utf8')
+const migrationFiles = readdirSync(migrationsDir)
+  .filter((name) => name.endsWith('.sql'))
+  .sort()
+
+if (migrationFiles.length === 0) {
+  console.error('No migration files found in migrations/')
+  process.exit(1)
+}
+
 const client = new pg.Client({ connectionString })
 
 try {
   await client.connect()
-  await client.query(sql)
+
+  for (const file of migrationFiles) {
+    const sql = readFileSync(join(migrationsDir, file), 'utf8')
+    console.log(`Running ${file}...`)
+    await client.query(sql)
+  }
+
   console.log('Migration completed successfully')
 } catch (error) {
   console.error('Migration failed:', error)
